@@ -55,4 +55,5 @@ Route::delete('/job/delete/{id}', 'App\Http\Controllers\API\JobsController@delet
 
 
 Route::get('/taameenat-data', 'App\Http\Controllers\API\TaameenatConstantsController@index');
+Route::get('/taameenat-data-2', 'App\Http\Controllers\API\TaameenatConstantsController@index');
 
