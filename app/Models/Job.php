@@ -15,4 +15,11 @@ class Job extends Model
     protected $table = 'JobsTable';
     protected $primaryKey = 'DepartmentID';
     public $timestamps = false; 
+
+
+    public static function getByID($id)
+    {
+        return self::where('JobID', $id)->first();
+    }
+
 }

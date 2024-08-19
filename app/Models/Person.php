@@ -10,6 +10,8 @@ use Laravel\Sanctum\HasApiTokens;
 use Illuminate\Database\Eloquent\Model;
 use App\Models\Roles;
 use App\Models\User;
+use App\Models\Department;
+use App\Models\PersonDepartment;
 
 class Person extends Model
 {
@@ -57,12 +59,28 @@ class Person extends Model
     protected $table = "PersonInformation";
     protected $primaryKey = 'PersonID';
 
+    public $timestamps = false;
+
 
     public function department()
     {
-        return $this->belongsTo(Department::class, 'DepartmentID', 'PersonDepartment');
+        return $this->belongsTo(Department::class, 'DepartmentID');
     }
 
-    
+    public function personDepartment()
+    {
+        return $this->hasOne(PersonDepartment::class, 'PersonID');
+    }
+
+    public static function getByRaqamQawmy($raqamQawmy)
+    {
+        return self::where('RaqamQawmy', $raqamQawmy)->first();
+    }
+
+    public static function getByID($id)
+    {
+        return self::where('PersonID', $id)->first();
+    }
+  
 
 }

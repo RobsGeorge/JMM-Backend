@@ -3,6 +3,7 @@
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\API\PersonController;
+use App\Http\Controllers\API\DepartmentsController;
 
 /*
 |--------------------------------------------------------------------------
@@ -21,14 +22,37 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 
 
 
-Route::get('/persons', array('uses'=>'App\Http\Controllers\API\PersonController@getAllPersons'));
-Route::get('/person-index', array('uses'=>'App\Http\Controllers\API\PersonController@getPersonIndex'));
-Route::get('/person/{id}', array('uses'=>'App\Http\Controllers\API\PersonController@getPersonByID'));
-Route::post('/person/insert', array('uses' => 'App\Http\Controllers\API\PersonController@insertPerson'));
+Route::get('/persons', 'App\Http\Controllers\API\PersonController@getAllPersons');
+Route::get('/person-index', 'App\Http\Controllers\API\PersonController@getAllPersonIndex');
+Route::get('/person/{id}', 'App\Http\Controllers\API\PersonController@getPersonByID');
+Route::put('/person/update/{id}', 'App\Http\Controllers\API\PersonController@update');
+Route::post('/person/insert',  'App\Http\Controllers\API\PersonController@insertPerson');
+Route::patch('/person/remove/{id}', 'App\Http\Controllers\API\PersonController@remove');
+Route::delete('/person/destroy/{id}','App\Http\Controllers\API\PersonController@destroy');
+Route::put('/person/revert/{id}', 'App\Http\Controllers\API\PersonController@revertPersonRemoval');
 
-Route::get('/person/add', array('as' => 'person.create', 'uses' =>'App\Http\Controllers\PersonNewController@create'));
-Route::get('/person/entry-questions/insert/{id}', array('as'=> 'person.entry-questions', 'uses'=>'App\Http\Controllers\PersonNewController@getQuestions'));
-Route::post('/person/entry-questions/submit', array('as'=> 'person.entry-questions-submit', 'uses'=>'App\Http\Controllers\PersonNewController@submitQuestions'));
 
-Route::get('/person/edit/{id}', array('as' => 'person.edit', 'uses' => 'App\Http\Controllers\PersonNewController@edit'));
-Route::patch('/person/update/{id}', array('as'=> 'person.update', 'uses'=> 'App\Http\Controllers\PersonNewController@updates'));  
+Route::get('/mohafzat', 'App\Http\Controllers\API\MohafzaController@getAllMohafzat');
+Route::get('/mohafza/{id}', 'App\Http\Controllers\API\MohafzaController@getMohafzaByID');
+Route::post('/mohafza/insert', 'App\Http\Controllers\API\MohafzaController@insertMohafza');
+Route::put('/mohafza/update/{id}', 'App\Http\Controllers\API\MohafzaController@update');
+Route::delete('/mohafza/delete/{id}', 'App\Http\Controllers\API\MohafzaController@delete');
+
+
+Route::get('/departments', 'App\Http\Controllers\API\DepartmentsController@getAllDepartments');
+Route::get('/department/{id}', 'App\Http\Controllers\API\DepartmentsController@getDepartmentByID');
+Route::post('/department/insert', 'App\Http\Controllers\API\DepartmentsController@insertDepartment');
+Route::put('/department/update/{id}', 'App\Http\Controllers\API\DepartmentsController@update');
+Route::delete('/department/delete/{id}', 'App\Http\Controllers\API\DepartmentsController@delete');
+
+
+Route::get('/jobs', 'App\Http\Controllers\API\JobsController@getAllJobs');
+Route::get('/job/{id}', 'App\Http\Controllers\API\JobsController@getJobByID');
+Route::post('/job/insert', 'App\Http\Controllers\API\JobsController@insertJob');
+Route::put('/job/update/{id}', 'App\Http\Controllers\API\JobsController@update');
+Route::delete('/job/delete/{id}', 'App\Http\Controllers\API\JobsController@delete');
+
+
+
+Route::get('/taameenat-data', 'App\Http\Controllers\API\TaameenatConstantsController@index');
+

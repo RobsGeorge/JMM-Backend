@@ -16,4 +16,9 @@ class Mohafza extends Model
     protected $primaryKey = 'MohafzaID';
     protected $table = 'MohafazatTable';
     public $timestamps = false;
+
+    public static function getByID($id)
+    {
+        return self::where('MohafzaID', $id)->first();
+    }
 }
