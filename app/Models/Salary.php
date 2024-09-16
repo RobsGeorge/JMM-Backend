@@ -9,7 +9,7 @@ class Salary extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['PersonID', 'Salary', 'IsPerDay', 'UpdateTimestamp'];
+    protected $fillable = ['PersonID', 'Salary', 'VariableSalary', 'IsPerDay', 'UpdateTimestamp'];
     protected $table = 'PersonSalary';
     protected $primaryKey = 'PersonID';
     public $timestamps = true;

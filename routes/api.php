@@ -31,6 +31,13 @@ Route::patch('/person/remove/{id}', 'App\Http\Controllers\API\PersonController@r
 Route::delete('/person/destroy/{id}','App\Http\Controllers\API\PersonController@destroy');
 Route::put('/person/revert/{id}', 'App\Http\Controllers\API\PersonController@revertPersonRemoval');
 
+//Route::post('/person/docs/upload', 'App\Http\Controllers\API\PersonController@uploadDocs');
+Route::get('/person/{id}/docs/{directory}', 'App\Http\Controllers\API\PersonController@getFile');
+Route::put('/person/docs/{id}', 'App\Http\Controllers\API\PersonController@updateFile');
+Route::get('/person/{id}/docs', 'App\Http\Controllers\API\PersonController@getAllFiles');
+Route::delete('/person/{id}/remove/docs/{directory}', 'App\Http\Controllers\API\PersonController@removeFile');
+Route::delete('/person/{id}/remove/docs', 'App\Http\Controllers\API\PersonController@removeAllFiles');
+
 
 Route::get('/mohafzat', 'App\Http\Controllers\API\MohafzaController@getAllMohafzat');
 Route::get('/mohafza/{id}', 'App\Http\Controllers\API\MohafzaController@getMohafzaByID');
@@ -55,5 +62,5 @@ Route::delete('/job/delete/{id}', 'App\Http\Controllers\API\JobsController@delet
 
 
 Route::get('/taameenat-data', 'App\Http\Controllers\API\TaameenatConstantsController@index');
-Route::get('/taameenat-data-2', 'App\Http\Controllers\API\TaameenatConstantsController@index');
+Route::put('/taameenat-data/update', 'App\Http\Controllers\API\TaameenatConstantsController@update');
 

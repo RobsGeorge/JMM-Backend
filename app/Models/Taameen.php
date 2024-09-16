@@ -14,5 +14,5 @@ class Taameen extends Model
     ];
     protected $table = 'TaameenTable';
     protected $primaryKey = 'ID';
-    public $timestamps = true;
+    public $timestamps = false;
 }

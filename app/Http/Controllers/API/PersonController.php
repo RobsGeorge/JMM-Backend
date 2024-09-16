@@ -17,10 +17,16 @@ use App\Models\PersonJob;
 use App\Models\PersonDepartment;
 use App\Models\PersonSalary;
 use App\Models\PersonTaameenValue;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 
 
 class PersonController extends Controller
 {
+    protected $workContractDirectory = "work_contract";
+    protected $personalPhotoDirectory = "personal_photo";
+    protected $personalIDDirectory = "personal_id_photo";
+    protected $birthCertificateDirectory = "birth_certificate";
 
     public function getAllPersons()
     {   
@@ -61,7 +67,7 @@ class PersonController extends Controller
             ->leftJoin('JobsTable', 'JobsTable.JobID', '=', 'PersonJob.JobID')
             ->leftJoin('PersonSalary', 'PersonSalary.PersonID', '=', 'PersonInformation.PersonID')
             ->leftJoin('PersonTaameenValue', 'PersonTaameenValue.PersonID', '=', 'PersonInformation.PersonID')
-            ->select('PersonInformation.*', 'PersonSalary.Salary', 'PersonTaameenValue.TaameenValue', 'JobsTable.JobName', 'DepartmentsTable.DepartmentName')
+            ->select('PersonInformation.*', 'PersonSalary.Salary', 'PersonSalary.VariableSalary', 'PersonTaameenValue.TaameenValue', 'JobsTable.JobName', 'DepartmentsTable.DepartmentName')
             ->where('PersonInformation.IsDeleted','0')->get();
         return response()->json(['data'=>$data, 'message'=>'All Persons Data Returned Successfully!'], 200);
     }
@@ -123,12 +129,40 @@ class PersonController extends Controller
                 'input_person_job_id' => 'required',
                 'input_person_taameen_value' => 'required',
                 'input_person_salary_value' => 'required',
-                'input_person_salary_is_per_day' => 'required' 
+                'input_person_salary_is_per_day' => 'required',
+                'input_date_of_birth_certificate_url' => 'nullable|mimes:pdf,jpeg,png,jpg,gif|max:2048', //MAX 2MB
+                'input_personal_id_photo_url' => 'nullable|mimes:pdf,jpeg,png,jpg,gif|max:2048', //MAX 2MB
+                'input_personal_photo_url' => 'nullable|mimes:pdf,jpeg,png,jpg,gif|max:2048', //MAX 2MB
+                'input_work_contract_photo_url' => 'nullable|mimes:pdf,jpeg,png,jpg,gif|max:2048' //MAX 2MB 
               ]);
 
             if ($validator->fails())
             {
                 return response()->json(['data'=>[], 'message'=>'Validation Failed', 'errors'=>$validator->errors()], 400);
+            }
+
+            $birthCertificatePath = "";
+            $personalPhotoPath = "";
+            $personalIDPhotoPath = "";
+            $workContractPath = "";
+
+            if($request->hasFile("input_date_of_birth_certificate_url"))
+            {
+                $birthCertificatePath = $this->uploadFile($request->file('input_date_of_birth_certificate_url'), $this->birthCertificateDirectory, $thisPersonID);
+                
+            }
+            if($request->hasFile("input_personal_photo_url"))
+            {
+                $personalPhotoPath = $this->uploadFile($request->file('input_personal_photo_url'), $this->personalPhotoDirectory, $thisPersonID);
+                
+            }
+            if($request->hasFile("input_personal_id_photo_url"))
+            {
+               $personalIDPhotoPath = $this->uploadFile($request->file('input_personal_id_photo_url'), $this->personalIDDirectory, $thisPersonID);
+            }
+            if($request->hasFile("input_work_contract_photo_url"))
+            {
+                $workContractPath = $this->uploadFile($request->file('input_work_contract_photo_url'), $this->workContractDirectory, $thisPersonID);
             }
         
         try{
@@ -148,9 +182,9 @@ class PersonController extends Controller
                     'TaameenNumber'         => $request->input_taameen_number,
                     'DateOfBirth'           => $request->input_date_of_birth,
                     'WorkStartDate'         => $request->input_work_start_date,
-                    'DateOfBirthCertificatePhotoURL' => $request->input_date_of_birth_certificate_url,
-                    'PersonalPhotoURL'      => $request->input_personal_photo_url,
-                    'PersonalIDPhotoURL'    => $request->input_personal_id_photo_url,
+                    'DateOfBirthCertificatePhotoURL' => $birthCertificatePath,
+                    'PersonalPhotoURL'      => $personalPhotoPath,
+                    'PersonalIDPhotoURL'    => $personalIDPhotoPath,
                     'MobileNumber'          => $request->input_mobile_number,
                     'LandlineNumber'        => $request->input_landline,
                     'StreetName'            => $request->input_street_name,
@@ -162,7 +196,7 @@ class PersonController extends Controller
                     'MaxPercentOfSalaryForSolfaPerMonth' => $request->input_max_percent_of_salary_for_solfa_per_month,
                     'WorkEmail'             => $request->input_work_email,
                     'PersonalEmail'         => $request->input_personal_email,
-                    'WorkContractPhotoURL'   =>$request->input_work_contract_photo_url,
+                    'WorkContractPhotoURL'   => $workContractPath,
                 )
             );
 
@@ -189,6 +223,7 @@ class PersonController extends Controller
             DB::table('PersonSalary')->insert(array(
                 'PersonID' => $thisPersonID,
                 'Salary' => $request->input_person_salary_value,
+                'VariableSalary' => $request->input_person_variable_salary_value,
                 'IsPerDay' => $request->input_person_salary_is_per_day
             ));
 
@@ -201,7 +236,15 @@ class PersonController extends Controller
 
             DB::commit();
 
-            $data = Person::where('PersonID', '=', $thisPersonID)->get();
+            $data = DB::table('PersonInformation')
+            ->leftJoin('PersonDepartment', 'PersonDepartment.PersonID', '=', 'PersonInformation.PersonID')
+            ->leftJoin('DepartmentsTable', 'PersonDepartment.DepartmentID', '=', 'DepartmentsTable.DepartmentID')
+            ->leftJoin('PersonJob', 'PersonJob.PersonID', '=', 'PersonInformation.PersonID')
+            ->leftJoin('JobsTable', 'JobsTable.JobID', '=', 'PersonJob.JobID')
+            ->leftJoin('PersonSalary', 'PersonSalary.PersonID', '=', 'PersonInformation.PersonID')
+            ->leftJoin('PersonTaameenValue', 'PersonTaameenValue.PersonID', '=', 'PersonInformation.PersonID')
+            ->select('PersonInformation.*', 'PersonSalary.*', 'PersonTaameenValue.TaameenValue', 'JobsTable.JobName', 'DepartmentsTable.DepartmentName')
+            ->where('PersonInformation.IsDeleted','0')->where('PersonInformation.PersonID','=',$thisPersonID)->get();
             return response()->json(['data'=>$data, 'message'=>'Person Inserted Successfully'], 201);
     }
 
@@ -265,7 +308,7 @@ class PersonController extends Controller
             'input_person_job_id' => 'required',
             'input_person_taameen_value' => 'required',
             'input_person_salary_value' => 'required',
-            'input_person_salary_is_per_day' => 'required' 
+            'input_person_salary_is_per_day' => 'required',
           ]);
 
         if ($validator->fails())
@@ -294,7 +337,6 @@ class PersonController extends Controller
                 'TaameenNumber'         => $request->input_taameen_number,
                 'DateOfBirth'           => $request->input_date_of_birth,
                 'WorkStartDate'         => $request->input_work_start_date,
-                'DateOfBirthCertificatePhotoURL' => $request->input_date_of_birth_certificate_url,
                 'PersonalPhotoURL'      => $request->input_personal_photo_url,
                 'PersonalIDPhotoURL'    => $request->input_personal_id_photo_url,
                 'MobileNumber'          => $request->input_mobile_number,
@@ -306,9 +348,6 @@ class PersonController extends Controller
                 'MaxNumberOfVacationDays' => $request->input_max_number_of_vacation_days,
                 'MaxValueOfSolfaPerMonth' => $request->input_max_value_of_salaray_for_solfa_per_month,
                 'MaxPercentOfSalaryForSolfaPerMonth' => $request->input_max_percent_of_salary_for_solfa_per_month,
-                'WorkEmail'             => $request->input_work_email,
-                'PersonalEmail'         => $request->input_personal_email,
-                'WorkContractPhotoURL'   =>$request->input_work_contract_photo_url,
             )
         );
 
@@ -323,11 +362,10 @@ class PersonController extends Controller
             array(
                 'PersonID'  => $id,
                 'Salary' => $request->input_person_salary_value,
+                'VariableSalary' => $request->input_person_variable_salary_value,
                 'IsPerDay' => $request->input_person_salary_is_per_day
             )
         );
-
-        
 
         $person_job->fill(
             array(
@@ -343,9 +381,6 @@ class PersonController extends Controller
             )
         );
 
-        //return $person_taameen;
-        
-
         if($person->isDirty()||$person_department->isDirty()||$person_salary->isDirty()||$person_job->isDirty()||$person_taameen->isDirty()){
             
             $changedAttributes = array();
@@ -353,35 +388,191 @@ class PersonController extends Controller
             if ($person->isDirty())
             {
                 $person->save();
-                array_merge($changedAttributes, $person->getChanges());
+                array_merge($changedAttributes, $person->getDirty());
             }
 
             if ($person_department->isDirty())
             {
                 $person_department->save();
-                array_merge($changedAttributes, $person_department->getChanges());
+                array_merge($changedAttributes, $person_department->getDirty());
             }
 
             if ($person_salary->isDirty())
             {
                 $person_salary->save();
-                array_merge($changedAttributes, $person_salary->getChanges());
+                array_merge($changedAttributes, $person_salary->getDirty());
             }
 
             if ($person_job->isDirty())
             {
                 $person_job->save();
-                array_merge($changedAttributes, $person_job->getChanges());
+                array_merge($changedAttributes, $person_job->getDirty());
             }
 
             if ($person_taameen->isDirty())
             {
                 $person_taameen->save();
-                array_merge($changedAttributes, $person_taameen->getChanges());
+                array_merge($changedAttributes, $person_taameen->getDirty());
             }
         return response()->json(['data'=>[], 'message'=>'Person Updated Successfully', 'changed_attributes' => $changedAttributes], 201);
     }
     return response()->json(['message' => 'No changes detected',], 200);
+    }
+
+    private function uploadFile($file, $directory, $userId) //Helper function For File Upload
+    {
+        // Generate unique file name
+        $fileName = $userId . '_' . time() . '.' . $file->getClientOriginalExtension();
+
+        // Create directory if it doesn't exist
+        $directoryPath = "uploads//".$directory;
+        if (!Storage::exists($directoryPath)) {
+            Storage::makeDirectory($directoryPath);
+        }
+
+        $file->storeAs($directoryPath, $fileName);
+
+        return $fileName;
+        //return Storage::url($filePath);
+    }
+
+    public function updateFile(Request $request, $id)
+    {
+        
+        $validator = Validator::make($request->all(),[
+            'input_date_of_birth_certificate_url' => 'nullable|mimes:pdf,jpeg,png,jpg,gif|max:2048', //MAX 2MB
+            'input_personal_id_photo_url' => 'nullable|mimes:pdf,jpeg,png,jpg,gif|max:2048', //MAX 2MB
+            'input_personal_photo_url' => 'nullable|mimes:pdf,jpeg,png,jpg,gif|max:2048', //MAX 2MB
+            'input_work_contract_photo_url' => 'nullable|mimes:pdf,jpeg,png,jpg,gif|max:2048' //MAX 2MB 
+          ]);
+
+        if ($validator->fails())
+        {
+            return response()->json(['data'=>[], 'message'=>'Validation Failed', 'errors'=>$validator->errors()], 400);
+        }
+
+        $data = [];
+        $exists = Person::select('PersonID')->where('PersonID', $id)->where('IsDeleted','0')->exists();
+        
+        if(!$exists)
+            return response()->json(['data'=>$data, 'message'=>'Person not found', 'status'=>400]);
+
+            $person = Person::findOrFail($id);
+
+            $birthCertificatePath = "";
+            $personalPhotoPath = "";
+            $personalIDPhotoPath = "";
+            $workContractPath = "";
+
+            if($request->hasFile("input_date_of_birth_certificate_url"))
+            {
+                return "0";
+                $directory= $this->birthCertificateDirectory;
+                $filename = $person->DateOfBirthCertificatePhotoURL;
+                $filePath = "uploads//".$directory."//".$filename;
+                if ($filePath && Storage::exists($filePath)) {
+                    Storage::delete($filePath); // Remove the old file from storage
+                }
+                $birthCertificatePath = $this->uploadFile($request->file('input_date_of_birth_certificate_url'), $this->birthCertificateDirectory, $id);
+                $person->fill(array(
+                    'DateOfBirthCertificatePhotoURL' => $birthCertificatePath
+                ));
+                $person->save();
+            }
+            if($request->hasFile("input_personal_photo_url"))
+            {
+                return "1";
+                $directory= $this->personalPhotoDirectory;
+                $filename = $person->PersonalPhotoURL;
+                $filePath = "uploads//".$directory."//".$filename;
+                if ($filePath && Storage::exists($filePath)) {
+                    Storage::delete($filePath); // Remove the old file from storage
+                }
+                $personalPhotoPath = $this->uploadFile($request->file('input_personal_photo_url'), $this->personalPhotoDirectory, $id);
+                $person->fill(array(
+                    'PersonalPhotoURL' => $personalPhotoPath
+                ));
+                $person->save();
+            }
+            if($request->hasFile("input_personal_id_photo_url"))
+            {
+                return "2";
+                $directory= $this->personalIDDirectory;
+                $filename = $person->PersonalIDPhotoURL;
+                $filePath = "uploads//".$directory."//".$filename;
+                if ($filePath && Storage::exists($filePath)) {
+                    Storage::delete($filePath); // Remove the old file from storage
+                }
+                $personalIDPhotoPath = $this->uploadFile($request->file('input_personal_id_photo_url'), $this->personalIDDirectory, $id);
+                $person->fill(array(
+                    'PersonalIDPhotoURL' => $personalIDPhotoPath
+                ));
+                $person->save();
+            }
+            if($request->hasFile("input_work_contract_photo_url"))
+            {
+                return "3";
+                $directory= $this->workContractDirectory;
+                $filename = $person->WorkContractPhotoURL;
+                $filePath = "uploads//".$directory."//".$filename;
+                if ($filePath && Storage::exists($filePath)) {
+                    Storage::delete($filePath); // Remove the old file from storage
+                }
+                $workContractPath = $this->uploadFile($request->file('input_work_contract_photo_url'), $this->workContractDirectory, $id);
+                $person->fill(array(
+                    'WorkContractPhotoURL' => $workContractPath
+                ));
+                $person->save();
+            }
+            else
+            {
+                return response()->json(['message' => 'File not found'], 404);
+            }
+            return response()->json(['message' => 'File Updated Successfully'], 200);
+    }   
+
+    public function getFile($directory, $id)
+    {   
+        $filename = "";
+        $data = [];
+        $exists = Person::select('PersonID')->where('PersonID', $id)->where('IsDeleted','0')->exists();
+        if(!$exists)
+            return response()->json(['data'=>$data, 'message'=>'Person not found', 'status'=>400]);
+
+        if($directory==$this->workContractDirectory||
+            $directory==$this->birthCertificateDirectory||
+            $directory==$this->personalIDDirectory||
+            $directory==$this->personalPhotoDirectory)
+        {
+            $data = DB::table('PersonInformation')->
+                    select("DateOfBirthCertificatePhotoURL", "PersonalPhotoURL", "PersonalIDPhotoURL", "WorkContractPhotoURL")->
+                    where("PersonID", "=", $id)->get();
+
+            
+            if($directory==$this->workContractDirectory)
+                $filename = $data->WorkContractPhotoURL;
+            else if($directory==$this->birthCertificateDirectory)
+                $filename = $data->DateOfBirthCertificatePhotoURL;
+            else if($directory==$this->personalIDDirectory)
+                $filename = $data->PersonalIDPhotoURL;
+            else if($directory==$this->personalPhotoDirectory)
+                $filename = $data->PersonalPhotoURL;
+            else
+                $filename = "";
+
+            $filePath = "uploads//".$directory."//".$filename;
+
+            // Check if the file exists in storage
+            if (Storage::exists($filePath)) {
+                // Return the file as a response for download/view
+                return Storage::download($filePath);
+            }
+            return response()->json(['message' => 'File not found'], 404);
+        }
+        else
+        {
+            return response()->json(['message' => 'Directory not found'], 404);
+        }
     }
 }
 ?>

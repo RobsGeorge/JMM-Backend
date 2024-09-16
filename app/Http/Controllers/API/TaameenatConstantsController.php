@@ -10,7 +10,7 @@ use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
 use \Illuminate\Http\Response;
 use Session;
-use App\Models\Person;
+use App\Models\Taameen;
 
 class TaameenatConstantsController extends Controller
 {
@@ -21,73 +21,53 @@ class TaameenatConstantsController extends Controller
         */
         public function index()
         {
-            $data = DB::table('TaameenTable')->select('TaameenMinValue', 'TaameenMaxValue')->orderBy('ID','desc')->first();
+            $data = DB::table('TaameenTable')->select('TaameenMinValue', 'TaameenMaxValue', 'TaameenPersonPercentage', 'TaameenCorporatePercentage')->orderBy('ID','desc')->first();
             
             return response()->json(['data'=>$data, 'message'=>'All Taameen Data Returned Successfully!', 'status'=>200]);
         }
 
-        public function create()
+    
+        public function update(Request $request)
         {
-            return view("district.create");
-        }
 
-        public function insert(Request  $request)
-        {
-            $lastDistrictID = DB::table('Districts')->orderBy('DistrictID','desc')->first();
+            $validator = Validator::make($request->all(),[
+                'input_taameen_min_value' => 'required',
+                'input_taameen_max_value' => 'required',
+                'input_taameen_person_percentage' => 'required',
+                'input_taameen_corporate_percentage' => 'required',
+              ]);
+    
+            if ($validator->fails())
+            {
+                return response()->json(['data'=>[], 'message'=>'Validation Failed', 'errors'=>$validator->errors()], 400);
+            }
+    
+            $taameen = Taameen::findOrFail(1);
 
-            if($lastDistrictID==Null)
-                $thisDistrictID = 1;
-            else
-                $thisDistrictID = $lastDistrictID->DistrictID + 1;
-
-            DB::table('Districts')->insert(
+            $taameen->fill(
                 array(
-                    'DistrictID' => $thisDistrictID,
-                    'DistrictName' => $request -> district_name
+                    'TaameenMinValue' => $request->input_taameen_min_value,
+                    'TaameenMaxValue' => $request->input_taameen_max_value,
+                    'TaameenPersonPercentage' => $request->input_taameen_person_percentage,
+                    'TaameenCorporatePercentage' => $request->input_taameen_corporate_percentage,
                 )
             );
-            return redirect()->route('district.index');
-        }
-    
-        /**
-            * Display the specified resource.
-            *
-            * @param  int  $id
-            * @return Response
-            */
-        public function show($id)
-        {
-            //
-        }
-    
-        /**
-            * Show the form for editing the specified resource.
-            *
-            * @param  int  $id
-            * @return Response
-            */
-        public function edit($id)
-        {
-            $district = DB::table('Districts')->where('DistrictID', $id)->first();
-            return view("district.edit", array('district' => $district));
-        }
-    
-        public function updates(Request $request, $id)
-        {
-            $affected = DB::table('Districts')->where('DistrictID', $id)->update(['DistrictName' => $request->district_name]);
-            return redirect()->route('district.index');
-        }
-    
-        public function deletes($id)
-        {
-            $district = DB::table('Districts')->where('DistrictID', $id)->first();
-            return view("district.delete", array('district' => $district));
-        }
 
-        public function destroy($id)
-        {
-            $deleted = DB::table('Districts')->where('DistrictID',$id)->delete();
-            
-            return redirect()->route('district.index');
+            if($taameen->isDirty()){
+                $taameen->UpdateTimestamp = now();
+                $changedAttributes = $taameen->getDirty();
+                $taameen->save();
+
+                return response()->json(
+                    [
+                        'message'=>'Fixed Taameen Data Updated Successfully',
+                        'changed_attributes' => $changedAttributes],
+                        201);
+            }
+
+            return response()->json(
+                [
+                    'message' => 'No changes detected'],
+                    200);
         }
 }

@@ -12,7 +12,7 @@ use App\Models\User;
 use App\Models\Department;
 use App\Models\Person;
 
-class PersonSalary extends Model
+class PersonVacation extends Model
 {
     use HasApiTokens, HasFactory, Notifiable;
 
@@ -23,13 +23,11 @@ class PersonSalary extends Model
      */
     protected $fillable = [
         'PersonID',
-        'Salary',
-        'VariableSalary',
-        'IsPerDay',
+        'JobID',
         'UpdateTimestamp',
     ];
 
-    protected $table = "PersonSalary";
+    protected $table = "PersonJob";
     protected $primaryKey = 'ID';
 
     public $timestamps = false;
@@ -39,6 +37,11 @@ class PersonSalary extends Model
     {
         return $this->belongsTo(Person::class, 'PersonID');
     }
+
+    public function job()
+    {
+        return $this->belongsTo(Job::class, 'JobID');
+    } 
 
     public static function getByPersonID($personID)
     {
