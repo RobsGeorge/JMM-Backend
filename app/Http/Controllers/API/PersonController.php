@@ -466,7 +466,7 @@ class PersonController extends Controller
 
             if($request->hasFile("input_date_of_birth_certificate_url"))
             {
-                return "0";
+                //return "0";
                 $directory= $this->birthCertificateDirectory;
                 $filename = $person->DateOfBirthCertificatePhotoURL;
                 $filePath = "uploads//".$directory."//".$filename;
@@ -481,7 +481,7 @@ class PersonController extends Controller
             }
             if($request->hasFile("input_personal_photo_url"))
             {
-                return "1";
+                //return "1";
                 $directory= $this->personalPhotoDirectory;
                 $filename = $person->PersonalPhotoURL;
                 $filePath = "uploads//".$directory."//".$filename;
@@ -496,7 +496,7 @@ class PersonController extends Controller
             }
             if($request->hasFile("input_personal_id_photo_url"))
             {
-                return "2";
+                //return "2";
                 $directory= $this->personalIDDirectory;
                 $filename = $person->PersonalIDPhotoURL;
                 $filePath = "uploads//".$directory."//".$filename;
@@ -511,7 +511,7 @@ class PersonController extends Controller
             }
             if($request->hasFile("input_work_contract_photo_url"))
             {
-                return "3";
+                //return "3";
                 $directory= $this->workContractDirectory;
                 $filename = $person->WorkContractPhotoURL;
                 $filePath = "uploads//".$directory."//".$filename;
