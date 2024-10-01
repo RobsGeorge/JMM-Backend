@@ -24,11 +24,19 @@ use Session;
 class AttendanceController extends Controller
 {
     // Get attendance with query parameters (supports filtering by date, month, and employee ID)
-    public function getAttendance(Request $request)
+    /*public function getAttendance(Request $request)
     {
         // Extract parameters from request (optional)
         $personId = $request->query('person_id');
         $date = $request->query('date'); // Specific date, optional
+        $month = $request->query('month'); // Specific month, optional
+
+
+        // Validate request parameters
+        $validatedData = $request->validate([
+            'date' => 'nullable|date_format:Y-m-d',
+            'month' => 'nullable|date_format:Y-m',
+        ]);
 
         // Query attendance based on parameters
         $query = PersonAttendance::query();
@@ -40,12 +48,6 @@ class AttendanceController extends Controller
 
         // If a specific date is requested
         if ($date) {
-            $validated = $request->validate([
-                'date' => 'date_format:Y-m-d'
-            ],
-            [
-                'date.date_format' => 'The attendance date must be in the format YYYY-MM-DD.',
-            ]);
             $query->whereDate('AttendanceDate', $date);
 
             // Step 1: Check if the attendance for the given date is already in the database
@@ -62,39 +64,352 @@ class AttendanceController extends Controller
                         'message' => 'هذا التاريخ هو أجازة أسبوعية لكل الموظفين'
                     ], 200);
                 }
-
-                if ($companyVacation = $this->getCompanyVacation($date)) {
+                else if ($companyVacation = $this->getCompanyVacation($date)) {
                     return response()->json([
                         'message' => ': هذا التاريخ هو أجازة رسمية مدفوعة لكل الموظفين'.$companyVacation->VacationName.''
                     ], 200);
                 }
-            }
+                else
+                {
+                    if($personId)
+                    {
 
+                    }
+
+                    $attendances = $query->with(['personInformation:PersonID,FirstName,SecondName,ThirdName,LandlineNumber'])
+                             ->select('PersonID', 'AttendanceDate', 'WorkStartTime', 'WorkEndTime', 'IsAbsent', 'IsWeeklyVacation', 'IsCompanyOnVacation', 'IsPersonalVacation')
+                             ->orderBy('AttendanceDate', 'asc')
+                             ->orderBy('PersonID', 'asc')
+                             ->get();
+
+                    // Format the response data
+                    $formattedData = $attendances->map(function ($attendance) {
+                        return [
+                            'PersonID' => $attendance->PersonID,
+                            'FirstName' => $attendance->personInformation->FirstName,
+                            'SecondName' => $attendance->personInformation->SecondName,
+                            'ThirdName' => $attendance->personInformation->ThirdName,
+                            'LandlineNumber' => $attendance->personInformation->LandlineNumber,
+                            'AttendanceDate' => $attendance->AttendanceDate,
+                            'WorkStartTime' => $attendance->WorkStartTime,
+                            'WorkEndTime' => $attendance->WorkEndTime,
+                            'IsAbsent' => $attendance->IsAbsent,
+                            'IsWeeklyVacation' => $attendance->IsWeeklyVacation,
+                            'IsCompanyOnVacation' => $attendance->IsCompanyOnVacation,
+                            'IsPersonalVacation' => $attendance->IsPersonalVacation
+                        ];
+                    });
+
+                    return response()->json(['AttendanceData' => $formattedData, 'message' => 'Attendance returned for specific date.'], 200);
+                }
+            }
         }
         else if ($request->has('month')) 
-        {  // Filter by month if provided
-
-            $validated = $request->validate([
-                'month' => 'date_format:Y-m'
-            ],
-            [
-                'month.date_format' => 'The attendance Month must be in the format YYYY-MM.',
-            ]);
+        {  
             $startDate = Carbon::createFromFormat('Y-m', $request->month)->startOfMonth();
             $endDate = Carbon::createFromFormat('Y-m', $request->month)->endOfMonth();
             $query->whereBetween('AttendanceDate', [$startDate, $endDate]);
+        
+            // Fetch attendance records for the month
+            $attendances = $query->with(['personInformation:PersonID,FirstName,SecondName,ThirdName,LandlineNumber'])
+                                ->select('PersonID', 'AttendanceDate', 'WorkStartTime', 'WorkEndTime', 'IsAbsent', 'IsWeeklyVacation', 'IsCompanyOnVacation', 'IsPersonalVacation')
+                                ->orderBy('AttendanceDate', 'asc')
+                                ->orderBy('PersonID', 'asc')
+                                ->get()
+                                ->groupBy('PersonID');
+
+            // Format attendance for each employee
+            $formattedData = [];
+            foreach ($attendances as $personId => $records) {
+                $person = $records->first()->personInformation;
+                $personAttendance = [
+                    'PersonID' => $person->PersonID,
+                    'FirstName' => $person->FirstName,
+                    'SecondName' => $person->SecondName,
+                    'ThirdName' => $person->ThirdName,
+                    'LandlineNumber' => $person->LandlineNumber,
+                    'attendance' => []
+                ];
+
+            // Loop through each day's attendance and format it
+            for ($day = 1; $day <= Carbon::createFromFormat('Y-m', $month)->daysInMonth; $day++) {
+                $attendanceForDay = $records->firstWhere('AttendanceDate', Carbon::createFromFormat('Y-m-d', $month . '-' . $day)->toDateString());
+
+                if ($attendanceForDay) {
+                    $personAttendance['attendance'][] = [
+                        'Day' => $day,
+                        'WorkStartTime' => $attendanceForDay->WorkStartTime,
+                        'WorkEndtime' => $attendanceForDay->WorkEndTime,
+                        'IsAbsent' => $attendanceForDay->IsAbsent,
+                        'IsWeeklyVacation' => $attendanceForDay->IsWeeklyVacation,
+                        'IsCompanyOnVacation' => $attendanceForDay->IsCompanyOnVacation,
+                        'IsPersonalVacation' => $attendanceForDay->IsPersonalVacation,
+                    ];
+                } else {
+                    // Default values for days with no attendance records
+                    $personAttendance['attendance'][] = [
+                        'Day' => $day,
+                        'WorkStartTime' => null,
+                        'WorkEndtime' => null,
+                        'IsAbsent' => null,
+                        'IsWeeklyVacation' => null,
+                        'IsCompanyOnVacation' => null,
+                        'IsPersonalVacation' => null,
+                    ];
+                }
+            }
+
+            $formattedData[] = $personAttendance;
         }
 
-        // Fetch the attendance records (Eager load the personInformation and personalVacation)
-        $attendances =  $query  ->with(['personInformation:PersonID,FirstName,SecondName,ThirdName,LandlineNumber'])
-                                ->select('AttendanceID', 'PersonID', 'AttendanceDate', 'WorkStartTime', 'WorkEndTime', 'IsAbsent', 'IsWeeklyVacation', 'IsCompanyOnVacation', 'IsPersonalVacation')
-                                ->orderBy('AttendanceDate', 'asc')
-                                ->orderBy('PersonID', 'asc')->get();
-                             
-
-        // Return the modified attendance records
-        return response()->json(['data'=>$attendances, 'message'=>'Attendance Returned Successfully'], 200);
+        return response()->json(['AttendanceData' => $formattedData, 'message' => 'Attendance returned for the month.'], 200);
+        }
+                            
     }
+    */
+
+
+    public function getAttendance(Request $request)
+    {
+        // Extract query parameters
+        $personId = $request->query('person_id');
+        $date = $request->query('date');
+        $month = $request->query('month');
+
+
+        if($personId)
+        {
+            $exists = Person::select('PersonID')->where('PersonID', $personId)->where('IsDeleted','0')->exists();
+            if(!$exists)
+                return response()->json(['message'=>'Person not found', 'status'=>400]);
+        }
+        
+        if($date)
+        {
+            $exists =  PersonAttendance::select('AttendanceID')->where('AttendanceDate', $date)->exists();
+            if(!$exists)
+                return response()->json(['message'=>'لا يوجد أي كشوفات حضور او انصراف مسجلة لهذا التاريخ', 'status'=>400]);
+        }
+
+        // Start a query on the PersonAttendance model
+        $query = PersonAttendance::query();
+
+        // Check if both date and month are provided; prioritize date
+        if ($date) {
+            $validated = $request->validate([
+                'date' => 'date_format:Y-m-d'
+            ], [
+                'date.date_format' => 'The attendance date must be in the format YYYY-MM-DD.',
+            ]);
+
+            // Step 1: Check if the attendance for the given date is already in the database
+            $existingRecords = PersonAttendance::where('AttendanceDate', $date)->get();
+
+            if ($existingRecords->isEmpty()) {
+                // If attendance is not found for this specific date
+                return response()->json(['message' => 'لم يتم فتح كشف حضور وانصراف لهذا التاريخ. يجب انتظار اليوم نفسه وسيتم فتحه تلقائياً'], 200);
+            }
+            else{
+                // If attendance is found for this specific date
+                if ($this->isWeeklyVacation($date)) {
+                    return response()->json([
+                        'message' => 'هذا التاريخ هو أجازة أسبوعية لكل الموظفين'
+                    ], 200);
+                }
+                else if ($companyVacation = $this->getCompanyVacation($date)) {
+                    return response()->json([
+                        'message' => 'هذا التاريخ هو أجازة رسمية مدفوعة بمناسبة: '.$companyVacation->VacationName.''
+                    ], 200);
+                }
+            }
+
+            if ($personId) {
+                $query->where('PersonID', $personId);
+            }
+
+            $query->whereDate('AttendanceDate', $date);
+
+            $attendances = $query->with(['personInformation:PersonID,FirstName,SecondName,ThirdName,LandlineNumber'])
+                                ->select('PersonID', 'AttendanceDate', 'WorkStartTime', 'WorkEndTime', 'IsAbsent', 'IsWeeklyVacation', 'IsCompanyOnVacation', 'IsPersonalVacation')
+                                ->orderBy('AttendanceDate', 'asc')
+                                ->orderBy('PersonID', 'asc')
+                                ->get();
+
+            $formattedData = $this->formatAttendanceByDate($attendances, $date);
+
+            if(empty($formattedData))
+                return response()->json(['message' => 'لا يوجد أي كشوف حضور او انصراف مسجلة في هذا التاريخ'], 400);
+
+            return response()->json(['AtendanceData' => $formattedData], 200);
+        }
+
+        // If only month is provided, fetch attendances for the entire month
+        if ($month) {
+            $validated = $request->validate([
+                'month' => 'date_format:Y-m'
+            ], [
+                'month.date_format' => 'The attendance month must be in the format YYYY-MM.',
+            ]);
+            
+            $startDate = Carbon::createFromFormat('Y-m', $month)->startOfMonth();
+            $endDate = Carbon::createFromFormat('Y-m', $month)->endOfMonth();
+
+            if ($personId) {
+                $query->where('PersonID', $personId);
+            }
+
+            $query->whereBetween('AttendanceDate', [$startDate, $endDate]);
+
+            $attendances = $query->with(['personInformation:PersonID,FirstName,SecondName,ThirdName,LandlineNumber'])
+                                ->select('PersonID', 'AttendanceDate', 'WorkStartTime', 'WorkEndTime', 'IsAbsent', 'IsWeeklyVacation', 'IsCompanyOnVacation', 'IsPersonalVacation')
+                                ->orderBy('AttendanceDate', 'asc')
+                                ->orderBy('PersonID', 'asc')
+                                ->get();
+
+            // Format response for multiple attendances in a month
+            $formattedData = $this->formatAttendanceByMonth($attendances, $month);
+            return response()->json($formattedData, 200);
+        }
+
+        // If only person_id is provided, fetch all attendances for that person
+        if ($personId) {
+            
+            $query->where('PersonID', $personId);
+
+            $attendances = $query->with(['personInformation:PersonID,FirstName,SecondName,ThirdName,LandlineNumber'])
+                                ->select('PersonID', 'AttendanceDate', 'WorkStartTime', 'WorkEndTime', 'IsAbsent', 'IsWeeklyVacation', 'IsCompanyOnVacation', 'IsPersonalVacation')
+                                ->orderBy('AttendanceDate', 'asc')
+                                ->orderBy('PersonID', 'asc')
+                                ->get();
+
+            $formattedData = $this->formatAttendanceByPerson($attendances);
+
+            return response()->json(['AttendanceData' => $formattedData, 'message' => 'All attendances returned for the person.'], 200);
+        }
+
+        // If no parameters are provided, return all attendances for all persons
+        $attendances = $query->with(['personInformation:PersonID,FirstName,SecondName,ThirdName,LandlineNumber'])
+                            ->select('PersonID', 'AttendanceDate', 'WorkStartTime', 'WorkEndTime', 'IsAbsent', 'IsWeeklyVacation', 'IsCompanyOnVacation', 'IsPersonalVacation')
+                            ->orderBy('AttendanceDate', 'asc')
+                            ->orderBy('PersonID', 'asc')
+                            ->get();
+
+        $formattedData = $this->formatAttendanceByPerson($attendances);
+
+
+        return response()->json(['AttendanceData' => $formattedData, 'message' => 'All attendances returned.'], 200);
+    }
+
+    // Helper function to format multiple attendances by month
+    protected function formatAttendanceByMonth($attendances, $month)
+    {
+        $data = [];
+        $daysInMonth = Carbon::createFromFormat('Y-m', $month)->daysInMonth;
+
+        foreach ($attendances->groupBy('PersonID') as $personId => $records) {
+            $person = $records->first()->personInformation;
+
+            $attendanceDays = [];
+            for ($day = 1; $day <= $daysInMonth; $day++) {
+                $attendanceForDay = $records->firstWhere('AttendanceDate', Carbon::createFromFormat('Y-m-d', $month . '-' . $day)->toDateString());
+
+                $attendanceDays[] = [
+                    'Day' => $day,
+                    'WorkStartTime' => optional($attendanceForDay)->WorkStartTime ?? null,
+                    'WorkEndTime' => optional($attendanceForDay)->WorkEndTime,
+                    'IsAbsent' => optional($attendanceForDay)->IsAbsent ?? null,
+                    'IsWeeklyVacation' => optional($attendanceForDay)->IsWeeklyVacation ?? null,
+                    'IsCompanyOnVacation' => optional($attendanceForDay)->IsCompanyOnVacation ?? null,
+                    'IsPersonalVacation' => optional($attendanceForDay)->IsPersonalVacation ?? null,
+                ];
+            }
+
+            $data[] = [
+                'PersonID' => $person->PersonID,
+                'FirstName' => $person->FirstName,
+                'SecondName' => $person->SecondName,
+                'ThirdName' => $person->ThirdName,
+                'LandlineNumber' => $person->LandlineNumber,
+                'attendance' => $attendanceDays,
+            ];
+        }
+
+        return $data;
+    }
+
+    protected function formatAttendanceByDate($attendances, $date)
+    {
+        $data = [];
+
+        // Group the attendances by PersonID to get each person's record for the given date
+        foreach ($attendances->groupBy('PersonID') as $personId => $records) {
+            // Get the person's information
+            $person = $records->first()->personInformation;
+
+            // Get the attendance for the specified date (since we're grouping by PersonID, there should be only one record per person for this date)
+            $attendance = $records->firstWhere('AttendanceDate', $date);
+
+            // Add each person's attendance to the final array
+            $data[] = [
+                'PersonID' => $person->PersonID,
+                'FirstName' => $person->FirstName,
+                'SecondName' => $person->SecondName,
+                'ThirdName' => $person->ThirdName,
+                'LandlineNumber' => $person->LandlineNumber,
+                'AttendanceDate' => $attendance->AttendanceDate,
+                'WorkStartTime' => $attendance->WorkStartTime,
+                'WorkEndTime' => $attendance->WorkEndTime,
+                'IsAbsent' => $attendance->IsAbsent,
+                'IsWeeklyVacation' => $attendance->IsWeeklyVacation,
+                'IsCompanyOnVacation' => $attendance->IsCompanyOnVacation,
+                'IsPersonalVacation' => $attendance->IsPersonalVacation
+            ];
+        }
+
+        return $data;
+    }
+
+    function formatAttendanceByPerson($attendances)
+    {
+        if ($attendances->isEmpty()) {
+            return []; // Return an empty array if no attendances are found
+        }
+
+        // Initialize an array to hold formatted attendance data
+        $formattedData = [];
+
+        // Group attendances by PersonID
+        foreach ($attendances as $attendance) {
+            $personId = $attendance->PersonID;
+
+            // Initialize a new entry for the person if not already done
+            if (!isset($formattedData[$personId])) {
+                $formattedData[$personId] = [
+                    'PersonID' => $personId,
+                    'FirstName' => $attendance->personInformation->FirstName,
+                    'SecondName' => $attendance->personInformation->SecondName,
+                    'ThirdName' => $attendance->personInformation->ThirdName,
+                    'LandlineNumber' => $attendance->personInformation->LandlineNumber,
+                    'attendance' => [], // Initialize the attendance array
+                ];
+            }
+
+            // Add the attendance details for this person
+            $formattedData[$personId]['attendance'][] = [
+                'AttendanceDate' => $attendance->AttendanceDate, // Get the day of the month
+                'WorkStartTime' => $attendance->WorkStartTime,
+                'WorkEndTime' => $attendance->WorkEndTime,
+                'IsAbsent' => (int) $attendance->IsAbsent,
+                'IsWeeklyVacation' => (int) $attendance->IsWeeklyVacation,
+                'IsCompanyOnVacation' => (int) $attendance->IsCompanyOnVacation,
+                'IsPersonalVacation' => (int) $attendance->IsPersonalVacation,
+            ];
+        }
+
+        // Return the formatted data as an array of persons
+        return array_values($formattedData); // Reset array keys
+    }
+
 
 
     public function insertAttendance(Request $request)
