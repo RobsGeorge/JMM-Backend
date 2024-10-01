@@ -12,7 +12,7 @@ use App\Models\User;
 use App\Models\Department;
 use App\Models\Person;
 
-class PersonVacation extends Model
+class PersonVacations extends Model
 {
     use HasApiTokens, HasFactory, Notifiable;
 
@@ -22,29 +22,23 @@ class PersonVacation extends Model
      * @var array<int, string>
      */
     protected $fillable = [
+        'PersonVacationID',
         'PersonID',
-        'JobID',
-        'UpdateTimestamp',
+        'VacationStartDate',
+        'VacatioEndDate',
+        'VacationTypeID',
+        'NumberOfVacationDays'
     ];
 
-    protected $table = "PersonJob";
-    protected $primaryKey = 'ID';
+    protected $table = "PersonVacations";
+    protected $primaryKey = 'PersonvacationID';
 
     public $timestamps = false;
 
 
-    public function person()
+    public function personAttendance()
     {
-        return $this->belongsTo(Person::class, 'PersonID');
+        return $this->hasMany(PersonAttendance::class, 'PersonID', 'PersonID');
     }
 
-    public function job()
-    {
-        return $this->belongsTo(Job::class, 'JobID');
-    } 
-
-    public static function getByPersonID($personID)
-    {
-        return self::where('PersonID', $personID)->first();
-    }
 }

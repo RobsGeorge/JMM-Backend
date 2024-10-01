@@ -4,6 +4,9 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\API\PersonController;
 use App\Http\Controllers\API\DepartmentsController;
+use App\Http\Controllers\API\AttendanceController;
+use App\Http\Controllers\API\WeekDaysController;
+use App\Http\Controllers\API\WorkingTimesController;
 
 /*
 |--------------------------------------------------------------------------
@@ -64,3 +67,13 @@ Route::delete('/job/delete/{id}', 'App\Http\Controllers\API\JobsController@delet
 Route::get('/taameenat-data', 'App\Http\Controllers\API\TaameenatConstantsController@index');
 Route::put('/taameenat-data/update', 'App\Http\Controllers\API\TaameenatConstantsController@update');
 
+
+Route::get('/attendance', [AttendanceController::class, 'getAttendance']);
+Route::post('/attendance', [AttendanceController::class, 'insertAttendance']);
+Route::put('/attendance', [AttendanceController::class, 'updateAttendance']);
+
+Route::get('/weekdays', [WeekDaysController::class, 'getWeekDays']);
+Route::put('/weekdays', [WeekDaysController::class, 'updateWeekDays']);
+
+Route::get('/workingtimes', [WorkingTimesController::class, 'getWorkingTimes']);
+Route::put('/workingtimes', [WorkingTimesController::class, 'updateWorkingTimes']);
