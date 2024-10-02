@@ -42,7 +42,8 @@ class DepartmentsController extends Controller
         {   
 
             $validator = Validator::make($request->all(),[
-                'input_department_name' => 'required'
+                'input_department_name' => 'required',
+                'input_department_description' => 'nullable|string'
             ]);
     
             if ($validator->fails())
