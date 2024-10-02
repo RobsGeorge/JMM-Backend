@@ -436,7 +436,7 @@ class AttendanceController extends Controller
         $attendanceRecords = [];
 
         // Step 3: Fetch all employees
-        $employees = Person::all()->where('IsDeleted','=',0); // Fetch all employees
+        $employees = Person::all()->where('IsDeleted','=',0); // Fetch all active employees
 
         // Step 4: Check if the day is a weekly vacation and insert records
         if ($this->isWeeklyVacation($date)) {

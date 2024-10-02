@@ -4,13 +4,16 @@ use App\Http\Controllers\API\AbsenceController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\API\PersonController;
+use App\Http\Controllers\API\MohafzaController;
 use App\Http\Controllers\API\DepartmentsController;
 use App\Http\Controllers\API\AttendanceController;
+use App\Http\Controllers\API\JobsController;
 use App\Http\Controllers\API\WeekDaysController;
 use App\Http\Controllers\API\WorkingTimesController;
 use App\Http\Controllers\API\VacationTypeController;
 use App\Http\Controllers\API\YearlyOfficialVacationsController;
-use App\Models\VacationType;
+use App\Http\Controllers\API\PersonVacationsController;
+use App\Http\Controllers\API\TaameenatConstantsController;
 
 /*
 |--------------------------------------------------------------------------
@@ -29,47 +32,47 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 
 
 
-Route::get('/persons', 'App\Http\Controllers\API\PersonController@getAllPersons');
-Route::get('/person-index', 'App\Http\Controllers\API\PersonController@getAllPersonIndex');
-Route::get('/person/{id}', 'App\Http\Controllers\API\PersonController@getPersonByID');
-Route::put('/person/update/{id}', 'App\Http\Controllers\API\PersonController@update');
-Route::post('/person/insert',  'App\Http\Controllers\API\PersonController@insertPerson');
-Route::patch('/person/remove/{id}', 'App\Http\Controllers\API\PersonController@remove');
-Route::delete('/person/destroy/{id}','App\Http\Controllers\API\PersonController@destroy');
-Route::put('/person/revert/{id}', 'App\Http\Controllers\API\PersonController@revertPersonRemoval');
+Route::get('/persons', [PersonController::class, 'getAllPersons']);
+Route::get('/person-index', [PersonController::class, 'getAllPersonIndex']);
+Route::get('/person/{id}', [PersonController::class, 'getPersonByID']);
+Route::put('/person/update/{id}', [PersonController::class, 'update']);
+Route::post('/person/insert',  [PersonController::class, 'insertPerson']);
+Route::patch('/person/remove/{id}', [PersonController::class, 'remove']);
+Route::delete('/person/destroy/{id}', [PersonController::class, 'destroy']);
+Route::put('/person/revert/{id}', [PersonController::class, 'revertPersonRemoval']);
 
 //Route::post('/person/docs/upload', 'App\Http\Controllers\API\PersonController@uploadDocs');
-Route::get('/person/{id}/docs/{directory}', 'App\Http\Controllers\API\PersonController@getFile');
-Route::put('/person/docs/{id}', 'App\Http\Controllers\API\PersonController@updateFile');
-Route::get('/person/{id}/docs', 'App\Http\Controllers\API\PersonController@getAllFiles');
-Route::delete('/person/{id}/remove/docs/{directory}', 'App\Http\Controllers\API\PersonController@removeFile');
-Route::delete('/person/{id}/remove/docs', 'App\Http\Controllers\API\PersonController@removeAllFiles');
+Route::get('/person/{id}/docs/{directory}', [PersonController::class, 'getFile']);
+Route::put('/person/docs/{id}', [PersonController::class, 'updateFile']);
+Route::get('/person/{id}/docs', [PersonController::class, 'getAllFiles']);
+Route::delete('/person/{id}/remove/docs/{directory}', [PersonController::class, 'removeFile']);
+Route::delete('/person/{id}/remove/docs', [PersonController::class, 'removeAllFiles']);
 
 
-Route::get('/mohafzat', 'App\Http\Controllers\API\MohafzaController@getAllMohafzat');
-Route::get('/mohafza/{id}', 'App\Http\Controllers\API\MohafzaController@getMohafzaByID');
-Route::post('/mohafza/insert', 'App\Http\Controllers\API\MohafzaController@insertMohafza');
-Route::put('/mohafza/update/{id}', 'App\Http\Controllers\API\MohafzaController@update');
-Route::delete('/mohafza/delete/{id}', 'App\Http\Controllers\API\MohafzaController@delete');
+Route::get('/mohafzat', [MohafzaController::class, 'getAllMohafzat']);
+Route::get('/mohafza/{id}', [MohafzaController::class, 'getMohafzaByID']);
+Route::post('/mohafza/insert', [MohafzaController::class, 'insertMohafza']);
+Route::put('/mohafza/update/{id}', [MohafzaController::class, 'update']);
+Route::delete('/mohafza/delete/{id}', [MohafzaController::class, 'delete']);
 
 
-Route::get('/departments', 'App\Http\Controllers\API\DepartmentsController@getAllDepartments');
-Route::get('/department/{id}', 'App\Http\Controllers\API\DepartmentsController@getDepartmentByID');
-Route::post('/department/insert', 'App\Http\Controllers\API\DepartmentsController@insertDepartment');
-Route::put('/department/update/{id}', 'App\Http\Controllers\API\DepartmentsController@update');
-Route::delete('/department/delete/{id}', 'App\Http\Controllers\API\DepartmentsController@delete');
+Route::get('/departments', [DepartmentsController::class, 'getAllDepartments']);
+Route::get('/department/{id}', [DepartmentsController::class, 'getDepartmentByID']);
+Route::post('/department/insert', [DepartmentsController::class, 'insertDepartment']);
+Route::put('/department/update/{id}', [DepartmentsController::class, 'update']);
+Route::delete('/department/delete/{id}', [DepartmentsController::class, 'delete']);
 
 
-Route::get('/jobs', 'App\Http\Controllers\API\JobsController@getAllJobs');
-Route::get('/job/{id}', 'App\Http\Controllers\API\JobsController@getJobByID');
-Route::post('/job/insert', 'App\Http\Controllers\API\JobsController@insertJob');
-Route::put('/job/update/{id}', 'App\Http\Controllers\API\JobsController@update');
-Route::delete('/job/delete/{id}', 'App\Http\Controllers\API\JobsController@delete');
+Route::get('/jobs', [JobsController::class, 'getAllJobs']);
+Route::get('/job/{id}', [JobsController::class, 'getJobByID']);
+Route::post('/job/insert', [JobsController::class, 'insertJob']);
+Route::put('/job/update/{id}', [JobsController::class, 'update']);
+Route::delete('/job/delete/{id}', [JobsController::class, 'delete']);
 
 
 
-Route::get('/taameenat-data', 'App\Http\Controllers\API\TaameenatConstantsController@index');
-Route::put('/taameenat-data/update', 'App\Http\Controllers\API\TaameenatConstantsController@update');
+Route::get('/taameenat-data', [TaameenatConstantsController::class, 'index']);
+Route::put('/taameenat-data/update', [TaameenatConstantsController::class, 'update']);
 
 
 Route::get('/attendance', [AttendanceController::class, 'getAttendance']);
@@ -97,3 +100,7 @@ Route::post('/officialvacations', [YearlyOfficialVacationsController::class, 'in
 Route::put('/officialvacations/{id}', [YearlyOfficialVacationsController::class, 'update']);
 Route::delete('/officialvacations/{id}', [YearlyOfficialVacationsController::class, 'delete']);
 
+Route::get('/personvacations', [PersonVacationsController::class, 'get']);
+Route::post('/personvacations', [PersonVacationsController::class, 'insert']);
+Route::put('/personvacations/{id}', [PersonVacationsController::class, 'update']);
+Route::delete('/personvacations/{id}', [PersonVacationsController::class, 'delete']);

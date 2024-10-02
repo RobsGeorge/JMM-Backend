@@ -24,14 +24,12 @@ class PersonVacations extends Model
     protected $fillable = [
         'PersonVacationID',
         'PersonID',
-        'VacationStartDate',
-        'VacatioEndDate',
-        'VacationTypeID',
-        'NumberOfVacationDays'
+        'VacationDate',
+        'VacationTypeID'
     ];
 
     protected $table = "PersonVacations";
-    protected $primaryKey = 'PersonvacationID';
+    protected $primaryKey = 'PersonVacationID';
 
     public $timestamps = false;
 
@@ -39,6 +37,16 @@ class PersonVacations extends Model
     public function personAttendance()
     {
         return $this->hasMany(PersonAttendance::class, 'PersonID', 'PersonID');
+    }
+
+    public function personInformation()
+    {
+        return $this->hasOne(Person::class, 'PersonID', 'PersonID');
+    }
+
+    public function vacationType()
+    {
+        return $this->hasOne(VacationType::class, 'VacationTypeID', 'VacationTypeID');
     }
 
 }
