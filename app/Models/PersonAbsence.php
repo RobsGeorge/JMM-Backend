@@ -22,29 +22,19 @@ class PersonAbsence extends Model
      * @var array<int, string>
      */
     protected $fillable = [
+        'AbsenceID',
         'PersonID',
-        'JobID',
-        'UpdateTimestamp',
+        'AbsenceDate',
+        'AbsenceReason'
     ];
 
-    protected $table = "PersonJob";
-    protected $primaryKey = 'ID';
+    protected $table = "PersonAbsence";
+    protected $primaryKey = 'AbsenceID';
 
     public $timestamps = false;
 
-
-    public function person()
+    public function personInformation()
     {
-        return $this->belongsTo(Person::class, 'PersonID');
-    }
-
-    public function job()
-    {
-        return $this->belongsTo(Job::class, 'JobID');
-    } 
-
-    public static function getByPersonID($personID)
-    {
-        return self::where('PersonID', $personID)->first();
+        return $this->belongsTo(Person::class, 'PersonID', 'PersonID');
     }
 }

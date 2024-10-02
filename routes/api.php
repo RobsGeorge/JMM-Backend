@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\API\AbsenceController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\API\PersonController;
@@ -77,3 +78,8 @@ Route::put('/weekdays', [WeekDaysController::class, 'updateWeekDays']);
 
 Route::get('/workingtimes', [WorkingTimesController::class, 'getWorkingTimes']);
 Route::put('/workingtimes', [WorkingTimesController::class, 'updateWorkingTimes']);
+
+Route::get('/absence', [AbsenceController::class, 'getAbsence']);
+Route::post('/absence', [AbsenceController::class, 'insertAbsence']);
+Route::put('/absence/{id}', [AbsenceController::class, 'updateAbsence']);
+Route::delete('/absence/{id}', [AbsenceController::class, 'deleteAbsence']);

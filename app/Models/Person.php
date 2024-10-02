@@ -81,6 +81,10 @@ class Person extends Model
     {
         return self::where('PersonID', $id)->first();
     }
-  
+    
+    public function absences()
+    {
+        return $this->hasMany(PersonAbsence::class, 'PersonID', 'PersonID');
+    }
 
 }

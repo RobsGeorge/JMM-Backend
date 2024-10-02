@@ -12,7 +12,7 @@ use App\Models\User;
 use App\Models\Department;
 use App\Models\Person;
 
-class PersonKhasm extends Model
+class PersonKhosoomat extends Model
 {
     use HasApiTokens, HasFactory, Notifiable;
 
@@ -23,28 +23,14 @@ class PersonKhasm extends Model
      */
     protected $fillable = [
         'PersonID',
-        'JobID',
-        'UpdateTimestamp',
+        'KhasmValue',
+        'KhasmDate',
+        'KhasmReason'
     ];
 
-    protected $table = "PersonJob";
-    protected $primaryKey = 'ID';
+    protected $table = "PersonKhosoomat";
+    protected $primaryKey = 'KhasmID';
 
     public $timestamps = false;
 
-
-    public function person()
-    {
-        return $this->belongsTo(Person::class, 'PersonID');
-    }
-
-    public function job()
-    {
-        return $this->belongsTo(Job::class, 'JobID');
-    } 
-
-    public static function getByPersonID($personID)
-    {
-        return self::where('PersonID', $personID)->first();
-    }
 }
