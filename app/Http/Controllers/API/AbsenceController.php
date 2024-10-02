@@ -323,10 +323,6 @@ class AbsenceController extends Controller
 
         // Step 2: Process the request and insert a new absence record
         try {
-
-
-            
-
             // Create a new absence record
             $absence = PersonAbsence::create([
                 'PersonID' => $validated['person_id'],

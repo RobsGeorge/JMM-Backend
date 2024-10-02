@@ -8,6 +8,9 @@ use App\Http\Controllers\API\DepartmentsController;
 use App\Http\Controllers\API\AttendanceController;
 use App\Http\Controllers\API\WeekDaysController;
 use App\Http\Controllers\API\WorkingTimesController;
+use App\Http\Controllers\API\VacationTypeController;
+use App\Http\Controllers\API\YearlyOfficialVacationsController;
+use App\Models\VacationType;
 
 /*
 |--------------------------------------------------------------------------
@@ -83,3 +86,14 @@ Route::get('/absence', [AbsenceController::class, 'getAbsence']);
 Route::post('/absence', [AbsenceController::class, 'insertAbsence']);
 Route::put('/absence/{id}', [AbsenceController::class, 'updateAbsence']);
 Route::delete('/absence/{id}', [AbsenceController::class, 'deleteAbsence']);
+
+Route::get('/vacationtype', [VacationTypeController::class, 'get']);
+Route::post('/vacationtype', [VacationTypeController::class, 'insert']);
+Route::put('/vacationtype/{id}', [VacationTypeController::class, 'update']);
+Route::delete('/vacationtype/{id}', [VacationTypeController::class, 'delete']);
+
+Route::get('/officialvacations', [YearlyOfficialVacationsController::class, 'get']);
+Route::post('/officialvacations', [YearlyOfficialVacationsController::class, 'insert']);
+Route::put('/officialvacations/{id}', [YearlyOfficialVacationsController::class, 'update']);
+Route::delete('/officialvacations/{id}', [YearlyOfficialVacationsController::class, 'delete']);
+
