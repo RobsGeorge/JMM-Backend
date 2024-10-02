@@ -40,6 +40,16 @@ class DepartmentsController extends Controller
 
         public function insertDepartment(Request $request)
         {   
+
+            $validator = Validator::make($request->all(),[
+                'input_department_name' => 'required'
+            ]);
+    
+            if ($validator->fails())
+            {
+                return response()->json(['data'=>[], 'message'=>'Validation Failed', 'errors'=>$validator->errors()], 400);
+            }
+            
             $exists = Department::first()->exists();
             if(!$exists)
                 $thisDepartmentID = 1;
@@ -51,14 +61,7 @@ class DepartmentsController extends Controller
                 $thisDepartmentID = $lastDepartmentID + 1;
             }
 
-            $validator = Validator::make($request->all(),[
-                'input_department_name' => 'required'
-            ]);
-    
-            if ($validator->fails())
-            {
-                return response()->json(['data'=>[], 'message'=>'Validation Failed', 'errors'=>$validator->errors()], 400);
-            }
+            
 
             $department = new Department();
             $department->fill(
