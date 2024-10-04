@@ -527,8 +527,7 @@ class AttendanceController extends Controller
     {
         // Check if the person has a vacation on the given date
         $vacation = PersonVacations::where('PersonID', $personId)
-            ->whereDate('VacationStartDate', '<=', $date)
-            ->whereDate('VacationEndDate', '>=', $date)
+            ->whereDate('VacationDate', $date)
             ->first();
         
         if ($vacation) {

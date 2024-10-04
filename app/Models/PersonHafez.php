@@ -22,29 +22,15 @@ class PersonHafez extends Model
      * @var array<int, string>
      */
     protected $fillable = [
+        'HafezID',
         'PersonID',
-        'JobID',
-        'UpdateTimestamp',
+        'HafezValue',
+        'HafezDate',
+        'HafezReason'
     ];
 
-    protected $table = "PersonJob";
+    protected $table = "PesonHawafez";
     protected $primaryKey = 'ID';
 
     public $timestamps = false;
-
-
-    public function person()
-    {
-        return $this->belongsTo(Person::class, 'PersonID');
-    }
-
-    public function job()
-    {
-        return $this->belongsTo(Job::class, 'JobID');
-    } 
-
-    public static function getByPersonID($personID)
-    {
-        return self::where('PersonID', $personID)->first();
-    }
 }
