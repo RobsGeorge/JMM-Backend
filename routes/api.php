@@ -16,6 +16,8 @@ use App\Http\Controllers\API\YearlyOfficialVacationsController;
 use App\Http\Controllers\API\PersonVacationsController;
 use App\Http\Controllers\API\TaameenatConstantsController;
 use App\Http\Controllers\API\PersonKhosoomatController;
+use App\Http\Controllers\API\PersonTaameenValueController;
+use App\Models\PersonTaameenValue;
 
 /*
 |--------------------------------------------------------------------------
@@ -118,4 +120,9 @@ Route::get('/khasm', [PersonKhosoomatController::class, 'get']);
 Route::post('/khasm', [PersonKhosoomatController::class, 'insert']);
 Route::put('/khasm/{id}', [PersonKhosoomatController::class, 'update']);
 Route::delete('/khasm/{id}', [PersonKhosoomatController::class, 'delete']);
+
+Route::get('/persontaameen', [PersonTaameenValueController::class, 'get']);
+Route::post('/persontaameen', [PersonTaameenValueController::class, 'insert']);
+Route::put('/persontaameen/{id}', [PersonTaameenValueController::class, 'update']);
+Route::delete('/persontaameen/{id}', [PersonTaameenValueController::class, 'delete']);
 
