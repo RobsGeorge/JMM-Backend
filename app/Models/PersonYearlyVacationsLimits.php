@@ -23,11 +23,12 @@ class PersonYearlyVacationsLimits extends Model
      */
     protected $fillable = [
         'PersonID',
-        'DepartmentID',
-        'UpdateTimestamp',
+        'Year',
+        'VacationTypeID',
+        'VacationLimit'
     ];
 
-    protected $table = "PersonDepartment";
+    protected $table = "PersonYearlyVacationLimits";
     protected $primaryKey = 'ID';
 
     public $timestamps = false;
@@ -36,15 +37,5 @@ class PersonYearlyVacationsLimits extends Model
     public function person()
     {
         return $this->belongsTo(Person::class, 'PersonID');
-    }
-
-    public function department()
-    {
-        return $this->belongsTo(Department::class, 'DepartmentID');
-    } 
-
-    public static function getByPersonID($personID)
-    {
-        return self::where('PersonID', $personID)->first();
     }
 }
