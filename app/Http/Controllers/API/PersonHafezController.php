@@ -5,7 +5,6 @@ namespace App\Http\Controllers\API;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Models\PersonHafez;
-use App\Models\PersonKhosoomat;
 
 class PersonHafezController extends Controller
 {
@@ -34,7 +33,7 @@ class PersonHafezController extends Controller
             $hafez = PersonHafez::where('PersonID', $request->person_id);
             if(!$hafez)
                 return response()->json(['message' => 'لا يوجد حوافز مسجلة لهذا الموظف'], 404);
-            $query->where('HafezID', $request->person_id)->orderBy('HafezDate', 'desc');
+            $query->where('PersonID', $request->person_id)->orderBy('HafezDate', 'desc');
         }
         
         // Filter by month
@@ -80,7 +79,7 @@ class PersonHafezController extends Controller
         $hafezReason = $validated['hafez_reason'];
         
         try{
-            $hafez = PersonKhosoomat::create([
+            $hafez = PersonHafez::create([
                 'PersonID' => $personId,
                 'HafezDate' => $hafezDate,
                 'HafezValue' => $hafezValue,
@@ -123,7 +122,7 @@ class PersonHafezController extends Controller
         $hafezReason = $validated['hafez_reason'];
         $hafezValue = $validated['hafez_value'];
 
-        $hafez = PersonKhosoomat::find($id);
+        $hafez = PersonHafez::find($id);
         
         // Check if vacation type exists
         if (!$hafez) {
@@ -164,7 +163,7 @@ class PersonHafezController extends Controller
 
     public function delete($id)
     {
-        $hafez = PersonKhosoomat::find($id);
+        $hafez = PersonHafez::find($id);
         
         // Check if vacation type exists
         if (!$hafez) {

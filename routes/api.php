@@ -16,6 +16,7 @@ use App\Http\Controllers\API\YearlyOfficialVacationsController;
 use App\Http\Controllers\API\PersonVacationsController;
 use App\Http\Controllers\API\TaameenatConstantsController;
 use App\Http\Controllers\API\PersonKhosoomatController;
+use App\Http\Controllers\API\PersonSalaryController;
 use App\Http\Controllers\API\PersonTaameenValueController;
 
 /*
@@ -33,8 +34,6 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
 
-
-
 Route::get('/persons', [PersonController::class, 'getAllPersons']);
 Route::get('/person-index', [PersonController::class, 'getAllPersonIndex']);
 Route::get('/person/{id}', [PersonController::class, 'getPersonByID']);
@@ -51,20 +50,17 @@ Route::get('/person/{id}/docs', [PersonController::class, 'getAllFiles']);
 Route::delete('/person/{id}/remove/docs/{directory}', [PersonController::class, 'removeFile']);
 Route::delete('/person/{id}/remove/docs', [PersonController::class, 'removeAllFiles']);
 
-
 Route::get('/mohafzat', [MohafzaController::class, 'getAllMohafzat']);
 Route::get('/mohafza/{id}', [MohafzaController::class, 'getMohafzaByID']);
 Route::post('/mohafza/insert', [MohafzaController::class, 'insertMohafza']);
 Route::put('/mohafza/update/{id}', [MohafzaController::class, 'update']);
 Route::delete('/mohafza/delete/{id}', [MohafzaController::class, 'delete']);
 
-
 Route::get('/departments', [DepartmentsController::class, 'getAllDepartments']);
 Route::get('/department/{id}', [DepartmentsController::class, 'getDepartmentByID']);
 Route::post('/department/insert', [DepartmentsController::class, 'insertDepartment']);
 Route::put('/department/update/{id}', [DepartmentsController::class, 'update']);
 Route::delete('/department/delete/{id}', [DepartmentsController::class, 'delete']);
-
 
 Route::get('/jobs', [JobsController::class, 'getAllJobs']);
 Route::get('/job/{id}', [JobsController::class, 'getJobByID']);
@@ -100,15 +96,15 @@ Route::post('/officialvacations', [YearlyOfficialVacationsController::class, 'in
 Route::put('/officialvacations/{id}', [YearlyOfficialVacationsController::class, 'update']);
 Route::delete('/officialvacations/{id}', [YearlyOfficialVacationsController::class, 'delete']);
 
-Route::get('/personvacations', [PersonVacationsController::class, 'get']);
-Route::post('/personvacations', [PersonVacationsController::class, 'insert']);
-Route::put('/personvacations/{id}', [PersonVacationsController::class, 'update']);
-Route::delete('/personvacations/{id}', [PersonVacationsController::class, 'delete']);
+Route::get('/person-vacations', [PersonVacationsController::class, 'get']);
+Route::post('/person-vacations', [PersonVacationsController::class, 'insert']);
+Route::put('/person-vacations/{id}', [PersonVacationsController::class, 'update']);
+Route::delete('/person-vacations/{id}', [PersonVacationsController::class, 'delete']);
 
-Route::get('/personvacations-limits', [PersonVacationsController::class, 'get']);
-Route::post('/personvacations-limits', [PersonVacationsController::class, 'insert']);
-Route::put('/personvacations-limits/{id}', [PersonVacationsController::class, 'update']);
-Route::delete('/personvacations-limits/{id}', [PersonVacationsController::class, 'delete']);
+Route::get('/person-vacations-limits', [PersonVacationsController::class, 'get']);
+Route::post('/person-vacations-limits', [PersonVacationsController::class, 'insert']);
+Route::put('/person-vacations-limits/{id}', [PersonVacationsController::class, 'update']);
+Route::delete('/person-vacations-limits/{id}', [PersonVacationsController::class, 'delete']);
 
 Route::get('/hafez', [PersonHafezController::class, 'get']);
 Route::post('/hafez', [PersonHafezController::class, 'insert']);
@@ -120,8 +116,18 @@ Route::post('/khasm', [PersonKhosoomatController::class, 'insert']);
 Route::put('/khasm/{id}', [PersonKhosoomatController::class, 'update']);
 Route::delete('/khasm/{id}', [PersonKhosoomatController::class, 'delete']);
 
-Route::get('/persontaameen', [PersonTaameenValueController::class, 'get']);
-Route::post('/persontaameen', [PersonTaameenValueController::class, 'insert']);
-Route::put('/persontaameen/{id}', [PersonTaameenValueController::class, 'update']);
-Route::delete('/persontaameen/{id}', [PersonTaameenValueController::class, 'delete']);
+Route::get('/person-taameen', [PersonTaameenValueController::class, 'get']);
+Route::post('/person-taameen', [PersonTaameenValueController::class, 'insert']);
+Route::put('/person-taameen/{id}', [PersonTaameenValueController::class, 'update']);
+Route::delete('/person-taameen/{id}', [PersonTaameenValueController::class, 'delete']);
+
+Route::get('/person-salary', [PersonSalaryController::class, 'get']);
+Route::post('/person-salary', [PersonSalaryController::class, 'insert']);
+Route::put('/perso-salary/{id}', [PersonSalaryController::class, 'update']);
+Route::delete('/person-salary/{id}', [PersonSalaryController::class, 'delete']);
+
+Route::get('/solfa', [PersonHafezController::class, 'get']);
+Route::post('/solfa', [PersonHafezController::class, 'insert']);
+Route::put('/solfa/{id}', [PersonHafezController::class, 'update']);
+Route::delete('/solfa/{id}', [PersonHafezController::class, 'delete']);
 

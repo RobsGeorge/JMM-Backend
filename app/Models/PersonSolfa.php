@@ -19,11 +19,12 @@ class PersonSolfa extends Model
      */
     protected $fillable = [
         'PersonID',
-        'JobID',
-        'UpdateTimestamp',
+        'SolfaValue',
+        'SolfaDate',
+        'SolfaReason'
     ];
 
-    protected $table = "PersonSolfa";
+    protected $table = "PersonSolaf";
     protected $primaryKey = 'SolfaID';
 
     public $timestamps = false;
