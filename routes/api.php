@@ -15,7 +15,7 @@ use App\Http\Controllers\API\VacationTypeController;
 use App\Http\Controllers\API\YearlyOfficialVacationsController;
 use App\Http\Controllers\API\PersonVacationsController;
 use App\Http\Controllers\API\TaameenatConstantsController;
-use App\Models\PersonKhosoomat;
+use App\Http\Controllers\API\PersonKhosoomatController;
 
 /*
 |--------------------------------------------------------------------------
@@ -71,11 +71,8 @@ Route::post('/job/insert', [JobsController::class, 'insertJob']);
 Route::put('/job/update/{id}', [JobsController::class, 'update']);
 Route::delete('/job/delete/{id}', [JobsController::class, 'delete']);
 
-
-
 Route::get('/taameenat-data', [TaameenatConstantsController::class, 'index']);
 Route::put('/taameenat-data/update', [TaameenatConstantsController::class, 'update']);
-
 
 Route::get('/attendance', [AttendanceController::class, 'getAttendance']);
 Route::post('/attendance', [AttendanceController::class, 'insertAttendance']);
@@ -107,6 +104,11 @@ Route::post('/personvacations', [PersonVacationsController::class, 'insert']);
 Route::put('/personvacations/{id}', [PersonVacationsController::class, 'update']);
 Route::delete('/personvacations/{id}', [PersonVacationsController::class, 'delete']);
 
+Route::get('/personvacations-limits', [PersonVacationsController::class, 'get']);
+Route::post('/personvacations-limits', [PersonVacationsController::class, 'insert']);
+Route::put('/personvacations-limits/{id}', [PersonVacationsController::class, 'update']);
+Route::delete('/personvacations-limits/{id}', [PersonVacationsController::class, 'delete']);
+
 Route::get('/hafez', [PersonHafezController::class, 'get']);
 Route::post('/hafez', [PersonHafezController::class, 'insert']);
 Route::put('/hafez/{id}', [PersonHafezController::class, 'update']);
@@ -116,3 +118,4 @@ Route::get('/khasm', [PersonKhosoomatController::class, 'get']);
 Route::post('/khasm', [PersonKhosoomatController::class, 'insert']);
 Route::put('/khasm/{id}', [PersonKhosoomatController::class, 'update']);
 Route::delete('/khasm/{id}', [PersonKhosoomatController::class, 'delete']);
+

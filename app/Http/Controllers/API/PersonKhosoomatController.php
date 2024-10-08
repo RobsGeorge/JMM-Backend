@@ -5,6 +5,7 @@ namespace App\Http\Controllers\API;
 use Illuminate\Http\Request;
 use App\Http\Requests;
 use App\Http\Controllers\Controller;
+use App\Models\PersonKhosoomat;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
@@ -20,141 +21,103 @@ use Carbon\Carbon;
 
 class PersonKhosoomatController extends Controller
 {
-    /**
-    * Display a listing of the resource.
-    *
-    * @return Response
-    */
     public function get(Request $request)
     {
-
-        // Validate the incoming request query parameters
         $request->validate([
-            'vacation_id' => 'sometimes|exists:PersonVacations,PersonVacationID',
-            'person_id' => 'sometimes|exists:PersonInformation,PersonID', // Assuming you have a persons table
+            'khasm_id' => 'sometimes|exists:PersonKhosoomat,KhasmID',
+            'person_id' => 'sometimes|exists:PersonInformation,PersonID',
             'month' => 'sometimes|date_format:Y-m',
             'year' => 'sometimes|integer|min:1900|max:'.date('Y'),
-            'vacation_type_id' => 'sometimes|exists:VacationTypesTable,VacationTypeID', // Assuming you have a vacation_types table
         ]);
 
         // Start building the query
-        $query = PersonVacations::query();
+        $query = PersonKhosoomat::query();
 
-        if ($request->has('vacation_id')) {
-            $vacation = $query->find($request->vacation_id);
-            if (!$vacation) {
-                return response()->json(['message' => 'Vacation not found'], 404);
+        if ($request->has('khasm_id')) {
+            $khasm = $query->find($request->khasm_id);
+            if (!$khasm) {
+                return response()->json(['message' => 'Khasm not found'], 404);
             }
-            return response()->json(['data' => $vacation, 'message' => 'Vacation Returned Successfully'], 200);
+            return response()->json(['data' => $khasm, 'message' => 'Khasm Returned Successfully'], 200);
         }
 
         
 
         // Filter by person_id
         if ($request->has('person_id')) {
-            $vacation = PersonVacations::where('PersonID', $request->person_id);
-            if(!$vacation)
-                return response()->json(['message' => 'لا يوجد أجازات مسجلة لهذا الموظف'], 404);
-            $query->where('PersonID', $request->person_id)->orderBy('VacationDate', 'desc');
+            $khasm = PersonKhosoomat::where('PersonID', $request->person_id);
+            if(!$khasm)
+                return response()->json(['message' => 'لا يوجد خصومات مسجلة لهذا الموظف'], 404);
+            $query->where('PersonID', $request->person_id)->orderBy('KhasmDate', 'desc');
         }
         
         // Filter by month
         if ($request->has('month')) {
             // Extract the year and month from the input
             [$year, $month] = explode('-', $request->month);
-            $query->whereMonth('VacationDate', $month)->orderBy('VacationDate', 'desc');
+            $query->whereMonth('KhasmDate', $month)->orderBy('KhasmDate', 'desc');
         }
 
         // Filter by year
         if ($request->has('year')) {
-            $query->whereYear('VacationDate', $request->year)->orderBy('VacationDate', 'desc');
+            $query->whereYear('KhasmDate', $request->year)->orderBy('KhasmDate', 'desc');
         }
 
-        // Filter by vacation_type_id
-        if ($request->has('vacation_type_id')) {
-            $query->where('VacationTypeID', $request->vacation_type_id)->orderBy('VacationDate', 'desc');
-        }
 
         // Check if no query parameters are present
-        if (!$request->hasAny(['person_id', 'month', 'year', 'vacation_type_id'])) {
+        if (!$request->hasAny(['khasm_id', 'person_id', 'month', 'year'])) {
             // If no query parameters, return all records
-            $vacations = $query->get();
-            return response()->json(['data'=>$vacations, 'message'=>'All Vacations Returned Successfully!'], 200);
+            $khosoomat = $query->get();
+            return response()->json(['data'=>$khosoomat, 'message'=>'All Khasm Returned Successfully!'], 200);
         }
 
         // Get the filtered results
-        $vacations = $query->get();
+        $khosoomat = $query->get();
     
-        if(empty($vacations))
-            return response()->json(['message'=>'لا يوجد أي أجازات مسجلة'], 404);
-        return response()->json(['data'=>$vacations, 'message'=>'All Vacations Returned Successfully!'], 200);
+        if(empty($khosoomat))
+            return response()->json(['message'=>'لا يوجد أي خصومات مسجلة'], 404);
+        return response()->json(['data'=>$khosoomat, 'message'=>'All Khosoomat Returned Successfully!'], 200);
     }
 
     public function insert(Request $request)
     {
         $validated = $request->validate([
-            'person_id' => 'required|integer',
-            'vacation_date' => 'required|date_format:Y-m-d',
-            'vacation_type_id' => 'required|integer|exists:VacationTypesTable,VacationTypeID'
+            'person_id' => 'required|integer|exists:PersonInformation,PersonID',
+            'khasm_date' => 'required|date_format:Y-m-d',
+            'khasm_value' => 'required|float',
+            'khasm_reason' => 'sometimes|text'
         ]);
 
-        $vacationDate = $validated['vacation_date'];
-
-        //Check if the day is a weekly vacation
-        if ($this->isWeeklyVacation($vacationDate)) {
-            return response()->json([
-                'message' => 'لا يمكن تسجيل أجازة في هذا اليوم حيث أن هذا اليوم هو أجازة أسبوعية'
-            ], 200);
-        }
-
-        //Check if the day is an official company vacation
-        if ($this->getCompanyVacation($vacationDate)) {
-            return response()->json([
-                'message' => 'لا يمكن تسجيل أجازة في هذا اليوم حيث أن هذا اليوم هو أجازة رسمية'
-            ], 200);
-        }
-
-        $vacationDateObj = Carbon::createFromFormat('Y-m-d', $vacationDate);
-        $today = Carbon::today();
-
-        if($today->greaterThan($vacationDateObj))
-        {
-            return response()->json(['message' => 'لا يمكن تسجيل الأجازة حيث أن تاريخ اليوم أكبر من تاريخ الأجازة المطلوب تسجيلها '], 400);
-        }
-
+        $khasmDate = $validated['khasm_date'];
         $personId = $validated['person_id'];
-        $vacationTypeId = $validated['vacation_type_id'];
-        
-        
-        $existing = PersonVacations::where('VacationDate', $vacationDate)->where('PersonID', $personId)->first();
-
-        if ($existing) 
-            return response()->json(['message' => 'لا يمكن ادخال الأجازة لأنه يوجد بالفعل أجازة بنفس التاريخ لنفس الموظف'], 409);
+        $khasmValue = $validated['khasm_value'];
+        $khasmReason = $validated['khasm_reason'];
         
         try{
-            $vacation = PersonVacations::create([
+            $khasm = PersonKhosoomat::create([
                 'PersonID' => $personId,
-                'VacationDate' => $vacationDate,
-                'VacationTypeID' => $vacationTypeId
+                'KhasmDate' => $khasmDate,
+                'KhasmValue' => $khasmValue,
+                'KhasmReason' => $khasmReason
             ]);
             
 
-            if ($vacation->save()) {
+            if ($khasm->save()) {
                 return response()->json([
-                    'data' => $vacation,
-                    'message' => 'تم تسجيل الأجازة بنجاح'
+                    'data' => $khasm,
+                    'message' => 'تم تسجيل الخصم بنجاح'
                 ], 201); 
             }
             else
             {
                 return response()->json([
-                    'message' => 'فشل في ادخال الأجازة. رجاء المحاولة مرة أخرى',
+                    'message' => 'فشل في ادخال الخصم. رجاء المحاولة مرة أخرى',
                 ], 500);
             }
 
         }catch (\Exception $e) {
             return response()->json([
-                'message' => 'فشل في ادخال الأجازة. رجاء المحاولة مرة أخرى',
+                'message' => 'فشل في ادخال الخصم. رجاء المحاولة مرة أخرى',
                 'error' => $e->getMessage()
             ], 500);
         }
@@ -165,68 +128,45 @@ class PersonKhosoomatController extends Controller
     {
         
         $validated = $request->validate([
-            'vacation_date' => 'required|date_format:Y-m-d',
-            'vacation_type_id' => 'required|integer|exists:VacationTypesTable,VacationTypeID'
+            'khasm_date' => 'required|date_format:Y-m-d',
+            'khasm_reason' => 'required|text',
+            'khasm_value' => 'required|float'
         ]);
         
-        $vacationDate = $validated['vacation_date'];
+        $khasmDate = $validated['khasm_date'];
+        $khasmReason = $validated['khasm_reason'];
+        $khasmValue = $validated['khasm_value'];
 
-        //Check if the day is a weekly vacation
-        if ($this->isWeeklyVacation($vacationDate)) {
-            return response()->json([
-                'message' => 'لا يمكن تعديل الأجازة في هذا اليوم حيث أن هذا اليوم هو أجازة أسبوعية'
-            ], 200);
-        }
-
-        //Check if the day is an official company vacation
-        if ($this->getCompanyVacation($vacationDate)) {
-            return response()->json([
-                'message' => 'لا يمكن تعديل الأجازة في هذا اليوم حيث أن هذا اليوم هو أجازة رسمية'
-            ], 200);
-        }
-
-        $vacationDateObj = Carbon::createFromFormat('Y-m-d', $vacationDate);
-        $today = Carbon::today();
-
-        if($today->greaterThan($vacationDateObj))
-        {
-            return response()->json(['message' => 'لا يمكن تعديل الأجازة حيث أن تاريخ اليوم أكبر من تاريخ الأجازة المطلوب تعديله '], 400);
-        }
-
-        $vacation = PersonVacations::find($id);
+        $khasm = PersonKhosoomat::find($id);
         
         // Check if vacation type exists
-        if (!$vacation) {
-            return response()->json(['message' => 'Vacation not found'], 404);
+        if (!$khasm) {
+            return response()->json(['message' => 'Khasm not found'], 404);
         }
-
-        $personId = $vacation->PersonID;
-        $vacationTypeId = $validated['vacation_type_id'];
-        
-        
-        $existing = PersonVacations::where('VacationDate', $vacationDate)->where('PersonID', $personId)->where('PersonVacationID', '!=', $id)->first();
-
-        if ($existing) 
-            return response()->json(['message' => 'لا يمكن تعديل الأجازة لأنه يوجد بالفعل أجازة بنفس التاريخ لنفس الموظف'], 409);
     
         // Track changes
         $changes = false;
 
-        if (isset($vacationDate) && $vacation->VacationDate !== $vacationDate) {
-            $vacation->VacationDate = $vacationDate;
+        if (isset($khasmDate) && $khasm->KhasmDate !== $khasmDate) {
+            $khasm->KhasmDate = $khasmDate;
             $changes = true;
         }
 
-        if (isset($vacationTypeId) && $vacation->VacationTypeID !== $vacationTypeId) {
-            $vacation->VacationTypeID = $vacationTypeId;
+        if (isset($khasmReason) && $khasm->KhasmReason !== $khasmReason) {
+            $khasm->KhasmReason = $khasmReason;
+            $changes = true;
+        }
+
+        if (isset($khasmValue) && $khasm->KhasmValue !== $khasmValue) {
+            $khasm->KhasmValue = $khasmValue;
             $changes = true;
         }
 
         // Save the changes to the database
         if ($changes) {
-            if ($vacation->save()) {
+            if ($khasm->save()) {
                 return response()->json([
-                    'message' => 'تم تعديل بيانات الاجازة بنجاح',
+                    'message' => 'تم تعديل بيانات الخصم بنجاح',
                 ], 200);
             } else {
                 return response()->json(['message' => 'فشل في تعديل البيانات'], 500);
@@ -238,37 +178,16 @@ class PersonKhosoomatController extends Controller
 
     public function delete($id)
     {
-        $vacation = PersonVacations::find($id);
+        $khasm = PersonKhosoomat::find($id);
         
         // Check if vacation type exists
-        if (!$vacation) {
-            return response()->json(['message' => 'Vacation not found'], 404);
+        if (!$khasm) {
+            return response()->json(['message' => 'Khasm not found'], 404);
         }
 
-        $vacationDate = Carbon::createFromFormat('Y-m-d', $vacation->VacationDate);
-        $today = Carbon::today();
-
-        if($today->greaterThan($vacationDate))
+        if($khasm->delete())
         {
-            return response()->json(['message' => 'لا يمكن إلغاء الأجازة حيث أن تاريخ اليوم أكبر من تاريخ الأجازة المطلوب الغاءها '], 400);
+            return response()->json(['message' => 'تم إلغاء الخصم بنجاح'], 200);
         }
-
-        if($vacation->delete())
-        {
-            return response()->json(['message' => 'تم إلغاء الأجازة بنجاح'], 200);
-        }
-    }
-
-    private function isWeeklyVacation($date)
-    {
-        $dayOfWeek = Carbon::parse($date)->format('l'); // Get day of the week (e.g., 'Saturday')
-        $weekDay = WeekDays::where('DayNameEnglish', $dayOfWeek)->first();
-
-        return $weekDay && $weekDay->IsWeeklyVacation;
-    }
-
-    private function getCompanyVacation($date)
-    {
-        return YearlyOfficialVacations::where('VacationDate', $date)->first();
     }
 }

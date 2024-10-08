@@ -22,7 +22,6 @@ class PersonHafez extends Model
      * @var array<int, string>
      */
     protected $fillable = [
-        'HafezID',
         'PersonID',
         'HafezValue',
         'HafezDate',
@@ -30,7 +29,7 @@ class PersonHafez extends Model
     ];
 
     protected $table = "PesonHawafez";
-    protected $primaryKey = 'ID';
+    protected $primaryKey = 'HafezID';
 
     public $timestamps = false;
 }
