@@ -60,4 +60,9 @@ class PersonAttendance extends Model
         // Using Carbon to get the day name in English from the AttendanceDate
         return Carbon::parse($this->AttendanceDate)->format('l'); // returns day like 'Saturday'
     }
+
+    public function person()
+    {
+        return $this->belongsTo(Person::class, 'PersonID', 'PersonID');
+    }
 }

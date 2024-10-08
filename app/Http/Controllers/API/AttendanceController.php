@@ -184,12 +184,6 @@ class AttendanceController extends Controller
                 return response()->json(['message'=>'Person not found', 'status'=>400]);
         }
         
-        if($date)
-        {
-            $exists =  PersonAttendance::select('AttendanceID')->where('AttendanceDate', $date)->exists();
-            if(!$exists)
-                return response()->json(['message'=>'لا يوجد أي كشوفات حضور او انصراف مسجلة لهذا التاريخ', 'status'=>400]);
-        }
 
         // Start a query on the PersonAttendance model
         $query = PersonAttendance::query();
@@ -202,7 +196,12 @@ class AttendanceController extends Controller
                 'date.date_format' => 'The attendance date must be in the format YYYY-MM-DD.',
             ]);
 
-            // Step 1: Check if the attendance for the given date is already in the database
+            $exists =  PersonAttendance::select('AttendanceID')->where('AttendanceDate', $date)->exists();
+            if(!$exists)
+                return response()->json(['message'=>'لا يوجد أي كشوفات حضور او انصراف مسجلة لهذا التاريخ', 'status'=>400]);
+
+            
+            // Step 1: Check if any attendance for the given date is already in the database
             $existingRecords = PersonAttendance::where('AttendanceDate', $date)->get();
 
             if ($existingRecords->isEmpty()) {
@@ -216,12 +215,14 @@ class AttendanceController extends Controller
                         'message' => 'هذا التاريخ هو أجازة أسبوعية لكل الموظفين'
                     ], 200);
                 }
-                else if ($companyVacation = $this->getCompanyVacation($date)) {
+                /*else if ($companyVacation = $this->getCompanyVacation($date)) {
                     return response()->json([
                         'message' => 'هذا التاريخ هو أجازة رسمية مدفوعة بمناسبة: '.$companyVacation->VacationName.''
                     ], 200);
-                }
+                }*/
             }
+
+            //$check = $this->addMissingEmployeesBeforeGettingAttendance($date);
 
             if ($personId) {
                 $query->where('PersonID', $personId);
@@ -597,6 +598,25 @@ class AttendanceController extends Controller
         } else {
             return response()->json(['message' => 'No changed fields.'], 200);
         }
+    }
+
+
+    private function addMissingEmployeesBeforeGettingAttendance($date)
+    {
+        $attendances = PersonAttendance::where('AttendanceDate', $date)->pluck('PersonID')->toArray();
+        $persons = Person::where('IsDeleted', 0)->pluck('PersonID')->toArray();
+        //return array_diff($persons, $attendances);
+            if(count($attendances) != count($persons))
+            {
+                //Add the missing employees that are not found in the attendance report of that day
+                $missingEmployeesIDs = array_diff($persons, $attendances);
+                foreach ($missingEmployeesIDs as $employeeID) {
+                    $this->createAttendanceRecord($employeeID, $date, false, true, false);
+                }
+            }
+        
+        $attendances = PersonAttendance::where('AttendanceDate', $date)->pluck('PersonID')->toArray();
+        return true;
     }
 
 

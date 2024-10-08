@@ -87,4 +87,10 @@ class Person extends Model
         return $this->hasMany(PersonAbsence::class, 'PersonID', 'PersonID');
     }
 
+    public function attendances()
+    {
+        return $this->hasMany(PersonAttendance::class, 'PersonID', 'PersonID');
+    }
+
+
 }

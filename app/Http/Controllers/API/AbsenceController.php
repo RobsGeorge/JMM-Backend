@@ -335,7 +335,7 @@ class AbsenceController extends Controller
 
             $khasm = PersonKhosoomat::create([
                 'PersonID' => $validated['person_id'],
-                'KhasmDate' =>  $validated['absence_date'],
+                'KhasmDate' =>  date("Y-m-d"),
                 'KhasmReason' => "غياب يوم ".$validated['absence_date'],
                 'KhasmValue' => $absenceMinusValue, //To be calculated later from Salaries
             ]);

@@ -8,12 +8,14 @@ use App\Http\Controllers\API\MohafzaController;
 use App\Http\Controllers\API\DepartmentsController;
 use App\Http\Controllers\API\AttendanceController;
 use App\Http\Controllers\API\JobsController;
+use App\Http\Controllers\API\PersonHafezController;
 use App\Http\Controllers\API\WeekDaysController;
 use App\Http\Controllers\API\WorkingTimesController;
 use App\Http\Controllers\API\VacationTypeController;
 use App\Http\Controllers\API\YearlyOfficialVacationsController;
 use App\Http\Controllers\API\PersonVacationsController;
 use App\Http\Controllers\API\TaameenatConstantsController;
+use App\Models\PersonKhosoomat;
 
 /*
 |--------------------------------------------------------------------------
@@ -104,3 +106,13 @@ Route::get('/personvacations', [PersonVacationsController::class, 'get']);
 Route::post('/personvacations', [PersonVacationsController::class, 'insert']);
 Route::put('/personvacations/{id}', [PersonVacationsController::class, 'update']);
 Route::delete('/personvacations/{id}', [PersonVacationsController::class, 'delete']);
+
+Route::get('/hafez', [PersonHafezController::class, 'get']);
+Route::post('/hafez', [PersonHafezController::class, 'insert']);
+Route::put('/hafez/{id}', [PersonHafezController::class, 'update']);
+Route::delete('/hafez/{id}', [PersonHafezController::class, 'delete']);
+
+Route::get('/khasm', [PersonKhosoomatController::class, 'get']);
+Route::post('/khasm', [PersonKhosoomatController::class, 'insert']);
+Route::put('/khasm/{id}', [PersonKhosoomatController::class, 'update']);
+Route::delete('/khasm/{id}', [PersonKhosoomatController::class, 'delete']);
