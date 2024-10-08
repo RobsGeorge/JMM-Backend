@@ -3,23 +3,12 @@
 namespace App\Http\Controllers\API;
 
 use Illuminate\Http\Request;
-use App\Http\Requests;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Validator;
-use Illuminate\Validation\Rule;
-use \Illuminate\Http\Response;
 use App\Models\WeekDays;
-use Session;
-use App\Models\Taameen;
 
 class WeekDaysController extends Controller
 {
-    /**
-    * Display a listing of the resource.
-    *
-    * @return Response
-    */
     public function getWeekDays()
     {
         $data = DB::table('WeekDaysTable')->select('DayID', 'DayNameArabic', 'DayNameEnglish', 'IsWeeklyVacation')->orderBy('DayID','asc')->get();

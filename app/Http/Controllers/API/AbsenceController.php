@@ -4,25 +4,15 @@ namespace App\Http\Controllers\API;
 
 
 use Illuminate\Http\Request;
-use App\Http\Requests;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Validator;
-use Illuminate\Validation\Rule;
-use \Illuminate\Http\Response;
 use Carbon\Carbon;
 use App\Models\PersonAttendance;
-use App\Models\PersonVacations;
 use App\Models\PersonAbsence;
 use App\Models\WeekDays;
 use App\Models\YearlyOfficialVacations;
-use App\Models\Person;
-use App\Models\PersonKhasm;
 use App\Models\PersonSalary;
 use App\Models\PersonKhosoomat;
-use App\Models\WorkingTimes;
-use Session;
-
 
 
 

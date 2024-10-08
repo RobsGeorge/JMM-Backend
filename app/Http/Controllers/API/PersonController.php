@@ -4,21 +4,15 @@ namespace App\Http\Controllers\API;
 
 
 use Illuminate\Http\Request;
-use App\Http\Requests;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
-use Illuminate\Validation\Rule;
-use \Illuminate\Http\Response;
-use Session;
 use App\Models\Person;
 use App\Models\PersonJob;
-
 use App\Models\PersonDepartment;
 use App\Models\PersonSalary;
 use App\Models\PersonTaameenValue;
 use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Str;
 
 
 class PersonController extends Controller

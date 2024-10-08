@@ -4,22 +4,13 @@ namespace App\Http\Controllers\API;
 
 
 use Illuminate\Http\Request;
-use App\Http\Requests;
 use App\Http\Controllers\Controller;
 use App\Models\Mohafza;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
-use Illuminate\Validation\Rule;
-use \Illuminate\Http\Response;
-use Session;
 
 class MohafzaController extends Controller
 {
-/**
-        * Display a listing of the resource.
-        *
-        * @return Response
-        */
         public function getAllMohafzat()
         {
             $data = DB::table('MohafazatTable')->get();

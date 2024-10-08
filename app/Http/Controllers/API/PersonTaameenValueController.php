@@ -3,22 +3,9 @@
 namespace App\Http\Controllers\API;
 
 use Illuminate\Http\Request;
-use App\Http\Requests;
 use App\Http\Controllers\Controller;
-use App\Models\PersonKhosoomat;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Validator;
-use Illuminate\Validation\Rule;
-use \Illuminate\Http\Response;
-use App\Models\WeekDays;
-use Session;
-use App\Models\Taameen;
-use App\Models\VacationType;
-use App\Models\WorkingTimes;
-use App\Models\YearlyOfficialVacations;
-use App\Models\PersonVacations;
 use App\Models\PersonTaameenValue;
-use Carbon\Carbon;
+
 
 class PersonTaameenValueController extends Controller
 {

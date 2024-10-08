@@ -17,7 +17,6 @@ use App\Http\Controllers\API\PersonVacationsController;
 use App\Http\Controllers\API\TaameenatConstantsController;
 use App\Http\Controllers\API\PersonKhosoomatController;
 use App\Http\Controllers\API\PersonTaameenValueController;
-use App\Models\PersonTaameenValue;
 
 /*
 |--------------------------------------------------------------------------

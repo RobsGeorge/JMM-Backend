@@ -3,13 +3,10 @@
 namespace App\Http\Controllers\API;
 
 use Illuminate\Http\Request;
-use App\Http\Requests;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
-use Illuminate\Validation\Rule;
 use \Illuminate\Http\Response;
-use Session;
 use App\Models\Taameen;
 
 class TaameenatConstantsController extends Controller
