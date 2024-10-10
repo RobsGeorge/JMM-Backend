@@ -10,24 +10,19 @@ class MonthlyTaameenat extends Model
 {
     use HasFactory;
     protected $fillable = [
-        'DepartmentID', 'DepartmentName', 'DepartmentDescription'
+        'PersonID', 
+        'PersonTaameenValueAtThatMonth', 
+        'TaameenValuePaidByPerson',
+        'TaameenValuePaidByCorporate',
+        'TaameenPersonPercentage',
+        'TaameenCorporatePercentage',
+        'Month',
+        'Year',
+        'UpdateTimestamp'
+
     ];
-    protected $primaryKey = 'DepartmentID';
-    protected $table = "DepartmentsTable";
+    protected $primaryKey = 'ID';
+    protected $table = "MonthlyTaameenat";
     public $timestamps = false;
 
-    public function people()
-    {
-        return $this->hasMany(Person::class, 'DepartmentID');
-    }
-
-    public function personDepartments()
-    {
-        return $this->hasMany(PersonDepartment::class, 'DepartmentID');
-    }
-
-    public static function getByID($id)
-    {
-        return self::where('DepartmentID', $id)->first();
-    }
 }

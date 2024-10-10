@@ -59,11 +59,11 @@ class AttendanceController extends Controller
             }
             else{
                 // If attendance is found for this specific date
-                if ($this->isWeeklyVacation($date)) {
+                /*if ($this->isWeeklyVacation($date)) {
                     return response()->json([
                         'message' => 'هذا التاريخ هو أجازة أسبوعية لكل الموظفين'
                     ], 200);
-                }
+                }*/
                 /*else if ($companyVacation = $this->getCompanyVacation($date)) {
                     return response()->json([
                         'message' => 'هذا التاريخ هو أجازة رسمية مدفوعة بمناسبة: '.$companyVacation->VacationName.''

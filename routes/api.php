@@ -7,6 +7,7 @@ use App\Http\Controllers\API\PersonController;
 use App\Http\Controllers\API\MohafzaController;
 use App\Http\Controllers\API\DepartmentsController;
 use App\Http\Controllers\API\AttendanceController;
+use App\Http\Controllers\API\ClosedMonthsController;
 use App\Http\Controllers\API\JobsController;
 use App\Http\Controllers\API\PersonHafezController;
 use App\Http\Controllers\API\WeekDaysController;
@@ -17,7 +18,9 @@ use App\Http\Controllers\API\PersonVacationsController;
 use App\Http\Controllers\API\TaameenatConstantsController;
 use App\Http\Controllers\API\PersonKhosoomatController;
 use App\Http\Controllers\API\PersonSalaryController;
+use App\Http\Controllers\API\PersonSolfaController;
 use App\Http\Controllers\API\PersonTaameenValueController;
+use App\Http\Controllers\API\PayrollController;
 
 /*
 |--------------------------------------------------------------------------
@@ -126,8 +129,14 @@ Route::post('/person-salary', [PersonSalaryController::class, 'insert']);
 Route::put('/perso-salary/{id}', [PersonSalaryController::class, 'update']);
 Route::delete('/person-salary/{id}', [PersonSalaryController::class, 'delete']);
 
-Route::get('/solfa', [PersonHafezController::class, 'get']);
-Route::post('/solfa', [PersonHafezController::class, 'insert']);
-Route::put('/solfa/{id}', [PersonHafezController::class, 'update']);
-Route::delete('/solfa/{id}', [PersonHafezController::class, 'delete']);
+Route::get('/solfa', [PersonSolfaController::class, 'get']);
+Route::post('/solfa', [PersonSolfaController::class, 'insert']);
+Route::put('/solfa/{id}', [PersonSolfaController::class, 'update']);
+Route::delete('/solfa/{id}', [PersonSolfaController::class, 'delete']);
+
+Route::get('/closed-months', [ClosedMonthsController::class, 'get']);
+
+Route::get('/payroll', [PayrollController::class, 'get']);
+Route::post('/payroll', [PayrollController::class, 'insert']);
+Route::put('/payroll/{id}', [PayrollController::class, 'update']);
 
