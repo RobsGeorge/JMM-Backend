@@ -14,7 +14,7 @@ class PersonSolfaController extends Controller
             'solfa_id' => 'sometimes|exists:PersonSolaf,SolfaID',
             'person_id' => 'sometimes|exists:PersonInformation,PersonID',
             'month' => 'sometimes|date_format:Y-m',
-            'year' => 'sometimes|integer|min:1900,
+            'year' => 'sometimes|integer|min:1900',
         ]);
 
         // Start building the query

@@ -19,7 +19,7 @@ class Payroll extends Model
         'NumberOfAbsentDays',
         'NumberOfAttendedDays',
         'NumberOfPersonalVacations',
-        'NumberOfOfficialvacations',
+        'NumberOfOfficialVacations',
         'NumberOfWeeklyVacations',
         'HawafezValue',
         'KhosoomatValue',

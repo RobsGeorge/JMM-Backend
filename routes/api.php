@@ -136,7 +136,9 @@ Route::delete('/solfa/{id}', [PersonSolfaController::class, 'delete']);
 
 Route::get('/closed-months', [ClosedMonthsController::class, 'get']);
 
-Route::get('/payroll', [PayrollController::class, 'get']);
-Route::post('/payroll', [PayrollController::class, 'insert']);
-Route::put('/payroll/{id}', [PayrollController::class, 'update']);
+Route::get('/payroll', [PayrollController::class, 'getPayroll']);
+Route::post('/payroll', [PayrollController::class, 'insertPayrollRecord']);
+Route::post('/payroll', [PayrollController::class, 'insertPayrollRecord']);
+Route::put('/payroll/{id}', [PayrollController::class, 'updatePayrollRecord']);
+Route::put('/close-payroll', [PayrollController::class, 'closePayroll']);
 

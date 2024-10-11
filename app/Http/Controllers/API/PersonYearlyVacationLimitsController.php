@@ -14,7 +14,7 @@ class PersonYearlyVacationLimits extends Controller
             'limit_id' => 'sometimes|exists:PersonYearlyVacationsLimits,ID',
             'person_id' => 'sometimes|exists:PersonInformation,PersonID',
             'vacation_type_id' => 'sometimes|Integer|exists:VacationTypesTable,VacationTypeID',
-            'year' => 'sometimes|integer|min:1900,
+            'year' => 'sometimes|integer|min:1900',
         ]);
 
         // Start building the query
