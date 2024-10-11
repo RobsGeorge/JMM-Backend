@@ -134,8 +134,11 @@ class PersonVacationsController extends Controller
 
             if ($vacation->save()) {
                 $attendance = PersonAttendance::where('PersonID', $personId)->where('AttendanceDate', $vacationDate)->first();
-                $attendance->IsPersonalVacation = 1;
-                $attendance->save();
+                if($attendance)
+                {
+                    $attendance->IsPersonalVacation = 1;
+                    $attendance->save();
+                }
                 return response()->json([
                     'data' => $vacation,
                     'message' => 'تم تسجيل الأجازة بنجاح'
@@ -210,15 +213,21 @@ class PersonVacationsController extends Controller
 
         if (isset($vacationDate) && $vacation->VacationDate !== $vacationDate) {
             $attendance = PersonAttendance::where('PersonID', $personId)->where('AttendanceDate', $vacation->VacationDate)->first();
-            $attendance->IsPersonalVacation = 0;
-            $attendance->save();
+            if($attendance)
+            {
+                $attendance->IsPersonalVacation = 0;
+                $attendance->save();
+            }
             
             $vacation->VacationDate = $vacationDate;
             $changes = true;
 
             $attendance = PersonAttendance::where('PersonID', $personId)->where('AttendanceDate', $vacationDate)->first();
-            $attendance->IsPersonalVacation = 1;
-            $attendance->save();
+            if($attendance)
+            {
+                $attendance->IsPersonalVacation = 1;
+                $attendance->save();
+            }
         }
 
         if (isset($vacationTypeId) && $vacation->VacationTypeID !== $vacationTypeId) {
@@ -260,8 +269,11 @@ class PersonVacationsController extends Controller
         if($vacation->delete())
         {
             $attendance = PersonAttendance::where('PersonID', $vacation->PersonID)->where('AttendanceDate', $vacation->VacationDate)->first();
-            $attendance->IsPersonalVacation = 0;
-            $attendance->save();
+            if($attendance)
+            {
+                $attendance->IsPersonalVacation = 0;
+                $attendance->save();
+            }
             return response()->json(['message' => 'تم إلغاء الأجازة بنجاح'], 200);
         }
     }
