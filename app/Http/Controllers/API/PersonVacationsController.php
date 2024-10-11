@@ -26,10 +26,11 @@ class PersonVacationsController extends Controller
             'vacation_id' => 'sometimes|exists:PersonVacations,PersonVacationID',
             'person_id' => 'sometimes|exists:PersonInformation,PersonID', // Assuming you have a persons table
             'month' => 'sometimes|date_format:Y-m',
-            'year' => 'sometimes|integer|min:1900|max:'.date('Y'),
+            'year' => 'sometimes|integer|min:1900',
             'vacation_type_id' => 'sometimes|exists:VacationTypesTable,VacationTypeID', // Assuming you have a vacation_types table
         ]);
 
+        return $request;
         // Start building the query
         $query = PersonVacations::query();
 

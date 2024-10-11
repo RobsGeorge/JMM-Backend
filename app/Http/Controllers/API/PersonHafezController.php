@@ -14,7 +14,7 @@ class PersonHafezController extends Controller
             'hafez_id' => 'sometimes|exists:PersonHawafez,HafezID',
             'person_id' => 'sometimes|exists:PersonInformation,PersonID',
             'month' => 'sometimes|date_format:Y-m',
-            'year' => 'sometimes|integer|min:1900|max:'.date('Y'),
+            'year' => 'sometimes|integer|min:1900,
         ]);
 
         // Start building the query
