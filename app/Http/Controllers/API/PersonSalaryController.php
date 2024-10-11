@@ -45,8 +45,8 @@ class PersonSalaryController extends Controller
     {
         $validated = $request->validate([
             'person_id' => 'required|integer|exists:PersonInformation,PersonID',
-            'salary_value' => 'required|float',
-            'variable_salary_value' => 'required|float',
+            'salary_value' => 'required',
+            'variable_salary_value' => 'required',
             'is_per_day' => 'required|integer'
         ]);
 
@@ -108,8 +108,8 @@ class PersonSalaryController extends Controller
     public function update(Request $request, $id)
     {
         $validated = $request->validate([
-            'salary_value' => 'required|float',
-            'variable_salary_value' => 'required|float',
+            'salary_value' => 'required',
+            'variable_salary_value' => 'required',
             'is_per_day' => 'required|integer'
         ]);
         

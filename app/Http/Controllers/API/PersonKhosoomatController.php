@@ -71,7 +71,7 @@ class PersonKhosoomatController extends Controller
         $validated = $request->validate([
             'person_id' => 'required|integer|exists:PersonInformation,PersonID',
             'khasm_date' => 'required|date_format:Y-m-d',
-            'khasm_value' => 'required|float',
+            'khasm_value' => 'required|==',
             'khasm_reason' => 'sometimes|text'
         ]);
 
@@ -117,7 +117,7 @@ class PersonKhosoomatController extends Controller
         $validated = $request->validate([
             'khasm_date' => 'required|date_format:Y-m-d',
             'khasm_reason' => 'required|text',
-            'khasm_value' => 'required|float'
+            'khasm_value' => 'required'
         ]);
         
         $khasmDate = $validated['khasm_date'];

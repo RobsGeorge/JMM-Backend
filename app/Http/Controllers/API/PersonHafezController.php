@@ -69,9 +69,11 @@ class PersonHafezController extends Controller
         $validated = $request->validate([
             'person_id' => 'required|integer|exists:PersonInformation,PersonID',
             'hafez_date' => 'required|date_format:Y-m-d',
-            'hafez_value' => 'required|float',
+            'hafez_value' => 'required',
             'hafez_reason' => 'sometimes|text'
         ]);
+
+        return $validated;
 
         $hafezDate = $validated['hafez_date'];
         $personId = $validated['person_id'];
@@ -115,7 +117,7 @@ class PersonHafezController extends Controller
         $validated = $request->validate([
             'hafez_date' => 'required|date_format:Y-m-d',
             'hafez_reason' => 'required|text',
-            'hafez_value' => 'required|float'
+            'hafez_value' => 'required'
         ]);
         
         $hafezDate = $validated['hafez_date'];

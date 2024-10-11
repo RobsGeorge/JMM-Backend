@@ -112,7 +112,7 @@ class MonthlyTaameenatController extends Controller
         $validated = $request->validate([
             'hafez_date' => 'required|date_format:Y-m-d',
             'hafez_reason' => 'required|text',
-            'hafez_value' => 'required|float'
+            'hafez_value' => 'required'
         ]);
         
         $hafezDate = $validated['hafez_date'];

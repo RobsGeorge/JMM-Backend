@@ -42,7 +42,7 @@ class PersonTaameenValueController extends Controller
     {
         $validated = $request->validate([
             'person_id' => 'required|exists:PersonInformation,PersonID',
-            'taameen_value' => 'required|float',
+            'taameen_value' => 'required',
         ]);
 
         $taameen = PersonTaameenValue::where('PersonID', $validated['person_id']);
@@ -95,7 +95,7 @@ class PersonTaameenValueController extends Controller
     public function update(Request $request, $id)
     {
         $validated = $request->validate([
-            'taameen_value' => 'required|float',
+            'taameen_value' => 'required',
         ]);
         
         $taameenValue = $validated['taameen_value'];
