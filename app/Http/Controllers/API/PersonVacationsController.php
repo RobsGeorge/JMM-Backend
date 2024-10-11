@@ -30,7 +30,7 @@ class PersonVacationsController extends Controller
             'vacation_type_id' => 'sometimes|exists:VacationTypesTable,VacationTypeID', // Assuming you have a vacation_types table
         ]);
 
-        return $request;
+        //return $request;
         // Start building the query
         $query = PersonVacations::query();
 
