@@ -411,7 +411,7 @@ class AttendanceController extends Controller
         
         // Check if the attendance record exists
         if (!$attendance) {
-            return response()->json(['message' => 'Attendance record not found.'], 404);
+            return response()->json(['message' => 'Attendance record not found.'], 200);
         }
 
         // Track changes

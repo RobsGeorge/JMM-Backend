@@ -24,7 +24,7 @@ class PersonKhosoomatController extends Controller
             $khasm = $query->find($request->khasm_id);
             
             if (!$khasm) {
-                return response()->json(['message' => 'Khasm not found'], 404);
+                return response()->json(['message' => 'Khasm not found'], 200);
             }
             $response = array();
             $person = $khasm->person;
@@ -46,7 +46,7 @@ class PersonKhosoomatController extends Controller
         if ($request->has('person_id')) {
             $khasm = PersonKhosoomat::where('PersonID', $request->person_id);
             if(!$khasm)
-                return response()->json(['message' => 'لا يوجد خصومات مسجلة لهذا الموظف'], 404);
+                return response()->json(['message' => 'لا يوجد خصومات مسجلة لهذا الموظف'], 200);
             $query->where('PersonID', $request->person_id)->orderBy('KhasmDate', 'desc');
         }
         
@@ -67,7 +67,7 @@ class PersonKhosoomatController extends Controller
         $khosoomat = $query->get();
         //return $khosoomat;
         if(empty($khosoomat))
-            return response()->json(['message'=>'لا يوجد أي خصومات مسجلة'], 404);
+            return response()->json(['message'=>'لا يوجد أي خصومات مسجلة'], 200);
 
         $response = array();
         $i=0;
@@ -150,7 +150,7 @@ class PersonKhosoomatController extends Controller
         
         // Check if vacation type exists
         if (!$khasm) {
-            return response()->json(['message' => 'Khasm not found'], 404);
+            return response()->json(['message' => 'Khasm not found'], 200);
         }
     
         // Track changes
@@ -191,7 +191,7 @@ class PersonKhosoomatController extends Controller
         
         // Check if vacation type exists
         if (!$khasm) {
-            return response()->json(['message' => 'Khasm not found'], 404);
+            return response()->json(['message' => 'Khasm not found'], 200);
         }
 
         if($khasm->delete())

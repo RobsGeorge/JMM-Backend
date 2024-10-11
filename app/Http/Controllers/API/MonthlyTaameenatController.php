@@ -22,7 +22,7 @@ class MonthlyTaameenatController extends Controller
         if ($request->has('taameen_id')) {
             $taameen = $query->find($request->hafez_id);
             if (!$taameen) {
-                return response()->json(['message' => 'Hafez not found'], 404); 
+                return response()->json(['message' => 'Hafez not found'], 200); 
             }
             return response()->json(['data' => $taameen, 'message' => 'Hafez Returned Successfully'], 200);
         }
@@ -31,7 +31,7 @@ class MonthlyTaameenatController extends Controller
         if ($request->has('person_id')) {
             $hafez = MonthlyTaameenat::where('PersonID', $request->person_id);
             if(!$hafez)
-                return response()->json(['message' => 'لا يوجد حوافز مسجلة لهذا الموظف'], 404);
+                return response()->json(['message' => 'لا يوجد حوافز مسجلة لهذا الموظف'], 200);
             $query->where('PersonID', $request->person_id)->orderBy('HafezDate', 'desc');
         }
         
@@ -59,7 +59,7 @@ class MonthlyTaameenatController extends Controller
         $hawafez = $query->get();
     
         if(empty($khosoomat))
-            return response()->json(['message'=>'لا يوجد أي حوافز مسجلة'], 404);
+            return response()->json(['message'=>'لا يوجد أي حوافز مسجلة'], 200);
         return response()->json(['data'=>$hawafez, 'message'=>'All Hawafez Returned Successfully!'], 200);
     }
 
@@ -123,7 +123,7 @@ class MonthlyTaameenatController extends Controller
         
         // Check if vacation type exists
         if (!$hafez) {
-            return response()->json(['message' => 'Hafez not found'], 404);
+            return response()->json(['message' => 'Hafez not found'], 200);
         }
     
         // Track changes
@@ -164,7 +164,7 @@ class MonthlyTaameenatController extends Controller
         
         // Check if vacation type exists
         if (!$hafez) {
-            return response()->json(['message' => 'Hafez not found'], 404);
+            return response()->json(['message' => 'Hafez not found'], 200);
         }
 
         if($hafez->delete())

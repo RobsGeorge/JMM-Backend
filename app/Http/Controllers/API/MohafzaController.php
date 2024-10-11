@@ -22,7 +22,7 @@ class MohafzaController extends Controller
 
             $exists = Mohafza::select('MohafzaID')->where('MohafzaID', $id)->exists();
             if(!$exists)
-                return response()->json(['data'=>$data, 'message'=>'Mohafza not found'], 404);
+                return response()->json(['data'=>$data, 'message'=>'Mohafza not found'], 200);
 
             $data = Mohafza::getByID($id);
             return response()->json(['data'=>$data, 'message'=>'Mohafza Returned Successfully!'],200);
@@ -69,7 +69,7 @@ class MohafzaController extends Controller
         {
             $exists = Mohafza::select('MohafzaID')->where('MohafzaID', $id)->exists();
             if(!$exists)
-                return response()->json(['data'=>[], 'message'=>'Mohafza not found'], 404);
+                return response()->json(['data'=>[], 'message'=>'Mohafza not found'], 200);
 
             $exists = Mohafza::where('MohafzaName', '=', $request->input_mohafza_name)->where('MohafzaID','!=',$id)->exists();
             if($exists)
@@ -105,7 +105,7 @@ class MohafzaController extends Controller
         {
             $exists = Mohafza::select('MohafzaID')->where('MohafzaID', $id)->exists();
             if(!$exists)
-                return response()->json(['data'=>[], 'message'=>'Mohafza not found'], 404);
+                return response()->json(['data'=>[], 'message'=>'Mohafza not found'], 200);
 
             Mohafza::where('MohafzaID', $id)->delete();
             return response()->json(['data'=>[], 'message'=>'Mohafza Deleted Successfully'], 200);

@@ -19,7 +19,7 @@ class VacationTypeController extends Controller
             $vacationType = VacationType::find($id);
             if(!$vacationType)
             {
-                return response()->json(['message' => 'Vacation Type not found'], 404);
+                return response()->json(['message' => 'Vacation Type not found'], 200);
             }
             return response()->json(['data' => $vacationType, 'message' => 'Vacation Type Returned Successfully'], 200);
         }
@@ -82,7 +82,7 @@ class VacationTypeController extends Controller
         
         // Check if vacation type exists
         if (!$vacationType) {
-            return response()->json(['message' => 'Vacation Type not found'], 404);
+            return response()->json(['message' => 'Vacation Type not found'], 200);
         }
     
         // Track changes
@@ -123,7 +123,7 @@ class VacationTypeController extends Controller
         
         // Check if vacation type exists
         if (!$vacationType) {
-            return response()->json(['message' => 'Vacation Type not found'], 404);
+            return response()->json(['message' => 'Vacation Type not found'], 200);
         }
 
         if($vacationType->delete())

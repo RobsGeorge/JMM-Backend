@@ -20,7 +20,7 @@ class PersonSalaryController extends Controller
         if ($request->has('salary_id')) {
             $salary = $query->find($validated['salary_id']);
             if (!$salary) {
-                return response()->json(['message' => 'Salary not found'], 404);
+                return response()->json(['message' => 'Salary not found'], 200);
             }
             return response()->json(['data' => $salary, 'message' => 'Salary Returned Successfully'], 200);
         }
@@ -29,7 +29,7 @@ class PersonSalaryController extends Controller
         if ($request->has('person_id')) {
             $salary = PersonSalary::where('PersonID', $validated['person_id']);
             if(!$salary)
-                return response()->json(['message' => 'لا يوجد مرتبات مسجلة لهذا الموظف'], 404);
+                return response()->json(['message' => 'لا يوجد مرتبات مسجلة لهذا الموظف'], 200);
             $query->where('PersonID', $validated['person_id'])->orderBy('UpdateTimestamp', 'desc');
         }
 
@@ -37,7 +37,7 @@ class PersonSalaryController extends Controller
         $salaries = $query->get();
     
         if(empty($salaries))
-            return response()->json(['message'=>'لا يوجد أي مرتبات مسجلة'], 404);
+            return response()->json(['message'=>'لا يوجد أي مرتبات مسجلة'], 200);
         return response()->json(['data'=>$salaries, 'message'=>'All Salaries Returned Successfully!'], 200);
     }
 
@@ -121,7 +121,7 @@ class PersonSalaryController extends Controller
         
         // Check if salary exists
         if (!$salary) {
-            return response()->json(['message' => 'Salary not found'], 404);
+            return response()->json(['message' => 'Salary not found'], 200);
         }
     
         // Track changes
@@ -162,7 +162,7 @@ class PersonSalaryController extends Controller
         
         // Check if taameen exists
         if (!$salary) {
-            return response()->json(['message' => 'Salary not found'], 404);
+            return response()->json(['message' => 'Salary not found'], 200);
         }
 
         if($salary->delete())

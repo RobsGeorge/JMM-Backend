@@ -21,7 +21,7 @@ class PersonTaameenValueController extends Controller
         if ($request->has('taameen_id')) {
             $taameen = $query->find($request->limit_id);
             if (!$taameen) {
-                return response()->json(['message' => 'Taameen Data not found'], 404);
+                return response()->json(['message' => 'Taameen Data not found'], 200);
             }
             return response()->json(['data' => $taameen, 'message' => 'Taameen Data Returned Successfully'], 200);
         }
@@ -29,7 +29,7 @@ class PersonTaameenValueController extends Controller
         {
             $taameen = PersonTaameenValue::where('PersonID', $request->person_id);
             if(!$taameen)
-                return response()->json(['message' => 'لا يوجد قيمة تأمينية لهذا الموظف'], 404);
+                return response()->json(['message' => 'لا يوجد قيمة تأمينية لهذا الموظف'], 200);
             $query->where('PersonID', $request->person_id)->orderBy('UpdateTimestamp', 'desc')->first();
             $taameen = $query->get();
             return response()->json(['data'=>$taameen, 'message'=>'Taameen Data Returned Successfully!'], 200);
@@ -103,7 +103,7 @@ class PersonTaameenValueController extends Controller
         
         // Check if taameen exists
         if (!$taameen) {
-            return response()->json(['message' => 'Taameen not found'], 404);
+            return response()->json(['message' => 'Taameen not found'], 200);
         }
     
         // Track changes
@@ -134,7 +134,7 @@ class PersonTaameenValueController extends Controller
         
         // Check if taameen exists
         if (!$taameen) {
-            return response()->json(['message' => 'Limit not found'], 404);
+            return response()->json(['message' => 'Limit not found'], 200);
         }
 
         if($taameen->delete())

@@ -23,7 +23,7 @@ class PersonYearlyVacationLimits extends Controller
         if ($request->has('limit_id')) {
             $limit = $query->find($request->limit_id);
             if (!$limit) {
-                return response()->json(['message' => 'Limit not found'], 404);
+                return response()->json(['message' => 'Limit not found'], 200);
             }
             return response()->json(['data' => $limit, 'message' => 'Khasm Returned Successfully'], 200);
         }
@@ -34,7 +34,7 @@ class PersonYearlyVacationLimits extends Controller
         if ($request->has('person_id')) {
             $limit = PersonYearlyVacationsLimits::where('PersonID', $request->person_id);
             if(!$limit)
-                return response()->json(['message' => 'لا يوجد حد أجازات مسجلة لهذا الموظف'], 404);
+                return response()->json(['message' => 'لا يوجد حد أجازات مسجلة لهذا الموظف'], 200);
             $query->where('PersonID', $request->person_id)->orderBy('Year', 'desc');
         }
 
@@ -42,7 +42,7 @@ class PersonYearlyVacationLimits extends Controller
         if ($request->has('vacation_type_id')) {
             $limit = PersonYearlyVacationsLimits::where('VacationTypeID', $request->vacation_type_id);
             if(!$limit)
-                return response()->json(['message' => 'لا يوجد حد أجازات مسجلة لهذا النوع من الأجازة'], 404);
+                return response()->json(['message' => 'لا يوجد حد أجازات مسجلة لهذا النوع من الأجازة'], 200);
             $query->where('VacationTypeID', $request->vacation_type_id)->orderBy('Year', 'desc');
         }
 
@@ -63,7 +63,7 @@ class PersonYearlyVacationLimits extends Controller
         $limits = $query->get();
     
         if(empty($khosoomat))
-            return response()->json(['message'=>'لا يوجد أي معلومات مسجلة'], 404);
+            return response()->json(['message'=>'لا يوجد أي معلومات مسجلة'], 200);
         return response()->json(['data'=>$khosoomat, 'message'=>'All Limits Returned Successfully!'], 200);
     }
 
@@ -123,7 +123,7 @@ class PersonYearlyVacationLimits extends Controller
         
         // Check if vacation type exists
         if (!$limit) {
-            return response()->json(['message' => 'Limit not found'], 404);
+            return response()->json(['message' => 'Limit not found'], 200);
         }
     
         // Track changes
@@ -154,7 +154,7 @@ class PersonYearlyVacationLimits extends Controller
         
         // Check if vacation type exists
         if (!$limit) {
-            return response()->json(['message' => 'Limit not found'], 404);
+            return response()->json(['message' => 'Limit not found'], 200);
         }
 
         if($limit->delete())

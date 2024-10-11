@@ -29,7 +29,7 @@ class WorkingTimesController extends Controller
         $workingTimes = WorkingTimes::find(1);
 
         if (!$workingTimes) {
-            return response()->json(['message' => 'Working times not found.'], 404);
+            return response()->json(['message' => 'Working times not found.'], 200);
         }
     
         // Track changes

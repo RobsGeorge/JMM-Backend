@@ -23,7 +23,7 @@ class JobsController extends Controller
 
         $exists = Job::select('JobID')->where('JobID', $id)->exists();
         if(!$exists)
-            return response()->json(['data'=>$data, 'message'=>'Job not found'], 404);
+            return response()->json(['data'=>$data, 'message'=>'Job not found'], 200);
 
         $data = Job::getByID($id);
         return response()->json(['data'=>$data, 'message'=>'Job Returned Successfully!'], 200);
@@ -70,7 +70,7 @@ class JobsController extends Controller
     {
         $exists = Job::select('JobID')->where('JobID', $id)->exists();
         if(!$exists)
-            return response()->json(['data'=>[], 'message'=>'Job not found'], 404);
+            return response()->json(['data'=>[], 'message'=>'Job not found'], 200);
 
         $exists = Job::where('JobName', '=', $request->input_job_name)->where('JobID','!=',$id)->exists();
         if($exists)
@@ -107,7 +107,7 @@ class JobsController extends Controller
     {
         $exists = Job::select('JobID')->where('JobID', $id)->exists();
         if(!$exists)
-            return response()->json(['data'=>[], 'message'=>'Job not found'], 404);
+            return response()->json(['data'=>[], 'message'=>'Job not found'], 200);
 
             Job::where('JobID', $id)->delete();
         return response()->json(['data'=>[], 'message'=>'Job Deleted Successfully'], 200);

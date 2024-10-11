@@ -30,7 +30,7 @@ class AbsenceController extends Controller
             // Get absence by AbsenceID
             $absence = PersonAbsence::with('personInformation')->find($absenceId);
             if (!$absence) {
-                return response()->json(['message' => 'Absence not found'], 404);
+                return response()->json(['message' => 'Absence not found'], 200);
             }
 
             $data = [
@@ -52,7 +52,7 @@ class AbsenceController extends Controller
                 $absences = PersonAbsence::with('personInformation')->where('PersonID', $personId)->where('AbsenceDate', $absenceDate)->orderBy('AbsenceDate', 'desc')->get();
                 // Check if there are any absences
                 if ($absences->isEmpty()) {
-                    return response()->json(['message' => 'لا يوجد أي غيابات موجودة في هذا التاريخ لهذا الموظف'], 404);
+                    return response()->json(['message' => 'لا يوجد أي غيابات موجودة في هذا التاريخ لهذا الموظف'], 200);
                 }
         
                 $groupedAbsences = $absences->groupBy('PersonID')->map(function ($absencesByPerson) {
@@ -90,7 +90,7 @@ class AbsenceController extends Controller
                 
                 // Check if there are any absences
                 if ($absences->isEmpty()) {
-                    return response()->json(['message' => 'لا يوجد أي غيابات موجودة في هذا الشهر لهذا الموظف'], 404);
+                    return response()->json(['message' => 'لا يوجد أي غيابات موجودة في هذا الشهر لهذا الموظف'], 200);
                 }
         
                 // Format the data
@@ -125,7 +125,7 @@ class AbsenceController extends Controller
 
                 // Check if there are any absences
                 if ($absences->isEmpty()) {
-                    return response()->json(['message' => 'لا يوجد أي غيابات موجودة في هذا العام لهذا الموظف'], 404);
+                    return response()->json(['message' => 'لا يوجد أي غيابات موجودة في هذا العام لهذا الموظف'], 200);
                 }
         
                 // Format the data
@@ -154,7 +154,7 @@ class AbsenceController extends Controller
             $absences = PersonAbsence::with('personInformation')->where('PersonID', $personId)->orderBy('AbsenceDate', 'desc')->get();
             // Check if there are any absences
             if ($absences->isEmpty()) {
-                return response()->json(['message' => 'لا يوجد أي غيابات موجودة لهذا الموظف'], 404);
+                return response()->json(['message' => 'لا يوجد أي غيابات موجودة لهذا الموظف'], 200);
             }
     
             // Format the data
@@ -184,7 +184,7 @@ class AbsenceController extends Controller
             $absences = PersonAbsence::with('personInformation')->where('AbsenceDate', $absenceDate)->get();
             // Check if there are any absences
             if ($absences->isEmpty()) {
-                return response()->json(['message' => 'لا يوجد أي غيابات موجودة في هذا التاريخ'], 404);
+                return response()->json(['message' => 'لا يوجد أي غيابات موجودة في هذا التاريخ'], 200);
             }
     
             $groupedAbsences = $absences->groupBy('PersonID')->map(function ($absencesByPerson) {
@@ -224,7 +224,7 @@ class AbsenceController extends Controller
             
             // Check if there are any absences
             if ($absences->isEmpty()) {
-                return response()->json(['message' => 'لا يوجد اي غيابات موجودة في هذا الشهر'], 404);
+                return response()->json(['message' => 'لا يوجد اي غيابات موجودة في هذا الشهر'], 200);
             }
     
             $groupedAbsences = $absences->groupBy('PersonID')->map(function ($absencesByPerson) {
@@ -255,7 +255,7 @@ class AbsenceController extends Controller
 
             // Check if there are any absences
             if ($absences->isEmpty()) {
-                return response()->json(['message' => 'لا يوجد أي غيابات موجودة في هذا العام'], 404);
+                return response()->json(['message' => 'لا يوجد أي غيابات موجودة في هذا العام'], 200);
             }
     
             $groupedAbsences = $absences->groupBy('PersonID')->map(function ($absencesByPerson) {
@@ -337,7 +337,7 @@ class AbsenceController extends Controller
 
             // Check if the attendance record exists
             if (!$attendance) {
-            return response()->json(['message' => 'تم تسجيل الغياب بنجاح في سجل الغيابات واضافة خصم للموظف ولكن لم يتم تعديله في كشف حضور وانصراف اليوم لعدم وجود كشف متاح لهذا اليوم'], 404);
+            return response()->json(['message' => 'تم تسجيل الغياب بنجاح في سجل الغيابات واضافة خصم للموظف ولكن لم يتم تعديله في كشف حضور وانصراف اليوم لعدم وجود كشف متاح لهذا اليوم'], 200);
             }
 
             $attendance->IsAbsent = 1;
@@ -379,7 +379,7 @@ class AbsenceController extends Controller
         
         // Check if absence exists
         if (!$absence) {
-            return response()->json(['message' => 'Absence not found'], 404);
+            return response()->json(['message' => 'Absence not found'], 200);
         }
 
         // Update the AbsenceReason (if provided)
@@ -399,7 +399,7 @@ class AbsenceController extends Controller
 
         // Check if absence exists
         if (!$absence) {
-            return response()->json(['message' => 'Absence not found'], 404);
+            return response()->json(['message' => 'Absence not found'], 200);
         }
 
         // Get PersonID and AbsenceDate for related updates

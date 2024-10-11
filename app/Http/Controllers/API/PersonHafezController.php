@@ -23,7 +23,7 @@ class PersonHafezController extends Controller
         if ($request->has('hafez_id')) {
             $hafez = $query->find($request->hafez_id);
             if (!$hafez) {
-                return response()->json(['message' => 'Hafez not found'], 404);
+                return response()->json(['message' => 'Hafez not found'], 200);
             }
 
             $response = array();
@@ -44,7 +44,7 @@ class PersonHafezController extends Controller
         if ($request->has('person_id')) {
             $hafez = PersonHafez::where('PersonID', $request->person_id);
             if(!$hafez)
-                return response()->json(['message' => 'لا يوجد حوافز مسجلة لهذا الموظف'], 404);
+                return response()->json(['message' => 'لا يوجد حوافز مسجلة لهذا الموظف'], 200);
             $query->where('PersonID', $request->person_id)->orderBy('HafezDate', 'desc');
         }
         
@@ -67,7 +67,7 @@ class PersonHafezController extends Controller
 
     
         if(empty($hawafez))
-            return response()->json(['message'=>'لا يوجد أي حوافز مسجلة'], 404);
+            return response()->json(['message'=>'لا يوجد أي حوافز مسجلة'], 200);
         
         $response = array();
         $i=0;
@@ -150,7 +150,7 @@ class PersonHafezController extends Controller
         
         // Check if vacation type exists
         if (!$hafez) {
-            return response()->json(['message' => 'Hafez not found'], 404);
+            return response()->json(['message' => 'Hafez not found'], 200);
         }
     
         // Track changes
@@ -191,7 +191,7 @@ class PersonHafezController extends Controller
         
         // Check if vacation type exists
         if (!$hafez) {
-            return response()->json(['message' => 'Hafez not found'], 404);
+            return response()->json(['message' => 'Hafez not found'], 200);
         }
 
         if($hafez->delete())

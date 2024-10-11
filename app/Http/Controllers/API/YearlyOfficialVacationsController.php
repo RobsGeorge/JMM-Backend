@@ -28,7 +28,7 @@ class YearlyOfficialVacationsController extends Controller
             $vacation = YearlyOfficialVacations::find($id);
             if(!$vacation)
             {
-                return response()->json(['message' => 'Vacation not found'], 404);
+                return response()->json(['message' => 'Vacation not found'], 200);
             }
             return response()->json(['data' => $vacation, 'message' => 'Vacation Returned Successfully'], 200);
         }
@@ -46,7 +46,7 @@ class YearlyOfficialVacationsController extends Controller
             
             // Check if there are any vacations
             if ($vacations->isEmpty()) {
-                return response()->json(['message' => 'لا يوجد أي أجازات رسمية موجودة في هذا الشهر'], 404);
+                return response()->json(['message' => 'لا يوجد أي أجازات رسمية موجودة في هذا الشهر'], 200);
             }
 
             return response()->json(['data'=>$vacations, 'message'=>'All Vacations Returned Successfully!'], 200);
@@ -59,7 +59,7 @@ class YearlyOfficialVacationsController extends Controller
 
             // Check if there are any vacations
             if ($vacations->isEmpty()) {
-                return response()->json(['message' => 'لا يوجد أي أجازات رسمية موجودة في هذا العام'], 404);
+                return response()->json(['message' => 'لا يوجد أي أجازات رسمية موجودة في هذا العام'], 200);
             }
 
             return response()->json(['data'=>$vacations, 'message'=>'All Vacations Returned Successfully!'], 200);
@@ -133,7 +133,7 @@ class YearlyOfficialVacationsController extends Controller
         
         // Check if vacation type exists
         if (!$vacation) {
-            return response()->json(['message' => 'Vacation not found'], 404);
+            return response()->json(['message' => 'Vacation not found'], 200);
         }
     
         // Track changes
@@ -179,7 +179,7 @@ class YearlyOfficialVacationsController extends Controller
         
         // Check if vacation type exists
         if (!$vacation) {
-            return response()->json(['message' => 'Vacation not found'], 404);
+            return response()->json(['message' => 'Vacation not found'], 200);
         }
 
         if($vacation->delete())

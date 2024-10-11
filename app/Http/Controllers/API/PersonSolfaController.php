@@ -23,7 +23,7 @@ class PersonSolfaController extends Controller
         if ($request->has('solfa_id')) {
             $solfa = $query->find($request->solfa_id);
             if (!$solfa) {
-                return response()->json(['message' => 'Solfa not found'], 404);
+                return response()->json(['message' => 'Solfa not found'], 200);
             }
             
             $response = array();
@@ -43,7 +43,7 @@ class PersonSolfaController extends Controller
         if ($request->has('person_id')) {
             $solfa = PersonSolfa::where('PersonID', $request->person_id);
             if(!$solfa)
-                return response()->json(['message' => 'لا يوجد سُلَف مسجلة لهذا الموظف'], 404);
+                return response()->json(['message' => 'لا يوجد سُلَف مسجلة لهذا الموظف'], 200);
             $query->where('PersonID', $request->person_id)->orderBy('SolfaDate', 'desc');
         }
         
@@ -63,7 +63,7 @@ class PersonSolfaController extends Controller
         $solaf = $query->get();
     
         if(empty($solaf))
-            return response()->json(['message'=>'لا يوجد أي سُلَف مسجلة'], 404);
+            return response()->json(['message'=>'لا يوجد أي سُلَف مسجلة'], 200);
 
         $response = array();
         $i=0;
@@ -146,7 +146,7 @@ class PersonSolfaController extends Controller
         
         // Check if vacation type exists
         if (!$solfa) {
-            return response()->json(['message' => 'Solfa not found'], 404);
+            return response()->json(['message' => 'Solfa not found'], 200);
         }
     
         // Track changes
@@ -187,7 +187,7 @@ class PersonSolfaController extends Controller
         
         // Check if vacation type exists
         if (!$solfa) {
-            return response()->json(['message' => 'Solfa not found'], 404);
+            return response()->json(['message' => 'Solfa not found'], 200);
         }
 
         if($solfa->delete())

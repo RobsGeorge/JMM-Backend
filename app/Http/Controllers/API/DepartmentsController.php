@@ -23,7 +23,7 @@ class DepartmentsController extends Controller
 
             $exists = Department::select('DepartmentID')->where('DepartmentID', $id)->exists();
             if(!$exists)
-                return response()->json(['data'=>$data, 'message'=>'Department not found'], 404);
+                return response()->json(['data'=>$data, 'message'=>'Department not found'], 200);
 
             $data = Department::getByID($id);
             return response()->json(['data'=>$data, 'message'=>'Department Returned Successfully!'], 200);
@@ -74,7 +74,7 @@ class DepartmentsController extends Controller
         {
             $exists = Department::select('DepartmentID')->where('DepartmentID', $id)->exists();
             if(!$exists)
-                return response()->json(['data'=>[], 'message'=>'Department not found'], 404);
+                return response()->json(['data'=>[], 'message'=>'Department not found'], 200);
 
             $exists = Department::where('DepartmentName', '=', $request->input_department_name)->where('DepartmentID','!=',$id)->exists();
             if($exists)
@@ -111,7 +111,7 @@ class DepartmentsController extends Controller
         {
             $exists = Department::select('DepartmentID')->where('DepartmentID', $id)->exists();
             if(!$exists)
-                return response()->json(['data'=>[], 'message'=>'Department not found'], 404);
+                return response()->json(['data'=>[], 'message'=>'Department not found'], 200);
 
                 Department::where('DepartmentID', $id)->delete();
             return response()->json(['data'=>[], 'message'=>'Department Deleted Successfully'], 200);

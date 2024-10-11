@@ -520,7 +520,7 @@ class PersonController extends Controller
             }
             else
             {
-                return response()->json(['message' => 'File not found'], 404);
+                return response()->json(['message' => 'File not found'], 200);
             }
             return response()->json(['message' => 'File Updated Successfully'], 200);
     }   
@@ -561,11 +561,11 @@ class PersonController extends Controller
                 // Return the file as a response for download/view
                 return Storage::download($filePath);
             }
-            return response()->json(['message' => 'File not found'], 404);
+            return response()->json(['message' => 'File not found'], 200);
         }
         else
         {
-            return response()->json(['message' => 'Directory not found'], 404);
+            return response()->json(['message' => 'Directory not found'], 200);
         }
     }
 }
