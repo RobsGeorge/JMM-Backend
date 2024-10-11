@@ -22,10 +22,22 @@ class PersonKhosoomatController extends Controller
 
         if ($request->has('khasm_id')) {
             $khasm = $query->find($request->khasm_id);
+            
             if (!$khasm) {
                 return response()->json(['message' => 'Khasm not found'], 404);
             }
-            return response()->json(['data' => $khasm, 'message' => 'Khasm Returned Successfully'], 200);
+
+            $person = $khasm->person;
+
+            $response['HafezID'] = $khasm->HafezID;
+            $response['PersonID'] = $khasm->PersonID;
+            $response['PersonFullName'] = $person->FirstName." ".$person->SecondName." ".$person->ThirdName;
+            $response['PersonCode'] = $person->LandlineNumber;
+            $response['KhasmDate'] = $khasm->KhasmDate;
+            $response['KhasmReason'] = $khasm->KhasmReason;
+            $response['KhasmValue'] = $khasm->KhasmValue;
+
+            return response()->json(['data' => $response, 'message' => 'Khasm Returned Successfully'], 200);
         }
 
         
@@ -51,19 +63,28 @@ class PersonKhosoomatController extends Controller
         }
 
 
-        // Check if no query parameters are present
-        if (!$request->hasAny(['khasm_id', 'person_id', 'month', 'year'])) {
-            // If no query parameters, return all records
-            $khosoomat = $query->get();
-            return response()->json(['data'=>$khosoomat, 'message'=>'All Khasm Returned Successfully!'], 200);
-        }
-
         // Get the filtered results
         $khosoomat = $query->get();
-    
+        //return $khosoomat;
         if(empty($khosoomat))
             return response()->json(['message'=>'لا يوجد أي خصومات مسجلة'], 404);
-        return response()->json(['data'=>$khosoomat, 'message'=>'All Khosoomat Returned Successfully!'], 200);
+
+        $i=0;
+        foreach($khosoomat as $khasm)
+        {
+            $person = $khasm->person;
+            
+            $response[$i]['KhasmID'] = $khasm->KhasmID;
+            $response[$i]['PersonID'] = $khasm->PersonID;
+            $response[$i]['PersonFullName'] = $person->FirstName." ".$person->SecondName." ".$person->ThirdName;
+            $response[$i]['PersonCode'] = $person->LandlineNumber;
+            $response[$i]['KhasmDate'] = $khasm->KhasmDate;
+            $response[$i]['KhasmReason'] = $khasm->KhasmReason;
+            $response[$i]['KhasmValue'] = $khasm->KhasmValue;
+
+            $i++;
+        }
+        return response()->json(['data'=>$response, 'message'=>'All Khosoomat Returned Successfully!'], 200);
     }
 
     public function insert(Request $request)

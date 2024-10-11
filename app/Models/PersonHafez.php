@@ -30,7 +30,7 @@ class PersonHafez extends Model
 
     public function person()
     {
-        return $this->belongsTo(Person::class, 'PersonID')->where('IsDeleted', 0);
+        return $this->belongsTo(Person::class, 'PersonID');
     }
 
 }

@@ -25,6 +25,16 @@ class PersonSolfaController extends Controller
             if (!$solfa) {
                 return response()->json(['message' => 'Solfa not found'], 404);
             }
+
+            $person = $solfa->person;
+
+            $response['HafezID'] = $solfa->HafezID;
+            $response['PersonID'] = $solfa->PersonID;
+            $response['PersonFullName'] = $person->FirstName." ".$person->SecondName." ".$person->ThirdName;
+            $response['PersonCode'] = $person->LandlineNumber;
+            $response['HafezDate'] = $solfa->HafezDate;
+            $response['HafezReason'] = $solfa->HafezReason;
+            $response['HafezValue'] = $solfa->HafezValue;
             return response()->json(['data' => $solfa, 'message' => 'Solfa Returned Successfully'], 200);
         }
 
