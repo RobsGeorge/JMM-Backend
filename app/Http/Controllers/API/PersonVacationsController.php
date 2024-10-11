@@ -72,7 +72,6 @@ class PersonVacationsController extends Controller
 
         // Filter by year
         if ($request->has('year')) {
-            return 'yes';
             $query->whereYear('VacationDate', $request->year)->orderBy('VacationDate', 'desc');
         }
 
