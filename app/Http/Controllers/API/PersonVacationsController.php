@@ -66,11 +66,12 @@ class PersonVacationsController extends Controller
         if ($request->has('month')) {
             // Extract the year and month from the input
             [$year, $month] = explode('-', $request->month);
-            $query->whereMonth('VacationDate', $month)->orderBy('VacationDate', 'desc');
+            $query->whereMonth('VacationDate', $month)->whereYear('VacationDate', $year)->orderBy('VacationDate', 'desc');
         }
 
         // Filter by year
         if ($request->has('year')) {
+            return 'yes';
             $query->whereYear('VacationDate', $request->year)->orderBy('VacationDate', 'desc');
         }
 

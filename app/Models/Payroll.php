@@ -13,7 +13,6 @@ class Payroll extends Model
 
     protected $fillable = [
         'PersonID',
-        'PersonID',
         'MainSalary',
         'VariableSalary',
         'DayValue',
@@ -42,7 +41,7 @@ class Payroll extends Model
 
     public $timestamps = false;
 
-    public function personInformation()
+    public function person()
     {
         return $this->belongsTo(Person::class, 'PersonID', 'PersonID');
     }
