@@ -25,17 +25,18 @@ class PersonSolfaController extends Controller
             if (!$solfa) {
                 return response()->json(['message' => 'Solfa not found'], 404);
             }
-
+            
+            $response = array();
             $person = $solfa->person;
 
-            $response['HafezID'] = $solfa->HafezID;
+            $response['SolfaID'] = $solfa->SolfaID;
             $response['PersonID'] = $solfa->PersonID;
             $response['PersonFullName'] = $person->FirstName." ".$person->SecondName." ".$person->ThirdName;
             $response['PersonCode'] = $person->LandlineNumber;
-            $response['HafezDate'] = $solfa->HafezDate;
-            $response['HafezReason'] = $solfa->HafezReason;
-            $response['HafezValue'] = $solfa->HafezValue;
-            return response()->json(['data' => $solfa, 'message' => 'Solfa Returned Successfully'], 200);
+            $response['SolfaDate'] = $solfa->SolfaDate;
+            $response['SolfaReason'] = $solfa->SolfaReason;
+            $response['SolfaValue'] = $solfa->SolfaValue;
+            return response()->json(['data' => $response, 'message' => 'Solfa Returned Successfully'], 200);
         }
 
         // Filter by person_id
@@ -63,7 +64,24 @@ class PersonSolfaController extends Controller
     
         if(empty($solaf))
             return response()->json(['message'=>'لا يوجد أي سُلَف مسجلة'], 404);
-        return response()->json(['data'=>$solaf, 'message'=>'All Solaf Returned Successfully!'], 200);
+
+        $response = array();
+        $i=0;
+        foreach($solaf as $solfa)
+        {
+            $person = $solfa->person;
+            
+            $response[$i]['SolfaID'] = $solfa->SolfaID;
+            $response[$i]['PersonID'] = $solfa->PersonID;
+            $response[$i]['PersonFullName'] = $person->FirstName." ".$person->SecondName." ".$person->ThirdName;
+            $response[$i]['PersonCode'] = $person->LandlineNumber;
+            $response[$i]['SolfaDate'] = $solfa->SolfaDate;
+            $response[$i]['SolfaReason'] = $solfa->SolfaReason;
+            $response[$i]['SolfaValue'] = $solfa->SolfaValue;
+
+            $i++;
+        }
+        return response()->json(['data'=>$response, 'message'=>'All Solaf Returned Successfully!'], 200);
     }
 
     public function insert(Request $request)

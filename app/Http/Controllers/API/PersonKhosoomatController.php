@@ -26,7 +26,7 @@ class PersonKhosoomatController extends Controller
             if (!$khasm) {
                 return response()->json(['message' => 'Khasm not found'], 404);
             }
-
+            $response = array();
             $person = $khasm->person;
 
             $response['HafezID'] = $khasm->HafezID;
@@ -69,6 +69,7 @@ class PersonKhosoomatController extends Controller
         if(empty($khosoomat))
             return response()->json(['message'=>'لا يوجد أي خصومات مسجلة'], 404);
 
+        $response = array();
         $i=0;
         foreach($khosoomat as $khasm)
         {

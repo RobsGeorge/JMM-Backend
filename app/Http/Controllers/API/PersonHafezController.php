@@ -25,7 +25,19 @@ class PersonHafezController extends Controller
             if (!$hafez) {
                 return response()->json(['message' => 'Hafez not found'], 404);
             }
-            return response()->json(['data' => $hafez, 'message' => 'Hafez Returned Successfully'], 200);
+
+            $response = array();
+            $person = $hafez->person;
+
+            $response['HafezID'] = $hafez->HafezID;
+            $response['PersonID'] = $hafez->PersonID;
+            $response['PersonFullName'] = $person->FirstName." ".$person->SecondName." ".$person->ThirdName;
+            $response['PersonCode'] = $person->LandlineNumber;
+            $response['KhasmDate'] = $hafez->KhasmDate;
+            $response['KhasmReason'] = $hafez->KhasmReason;
+            $response['KhasmValue'] = $hafez->KhasmValue;
+
+            return response()->json(['data' => $response, 'message' => 'Hafez Returned Successfully'], 200);
         }
 
         // Filter by person_id
@@ -56,7 +68,8 @@ class PersonHafezController extends Controller
     
         if(empty($hawafez))
             return response()->json(['message'=>'لا يوجد أي حوافز مسجلة'], 404);
-
+        
+        $response = array();
         $i=0;
         foreach($hawafez as $hafez)
         {
