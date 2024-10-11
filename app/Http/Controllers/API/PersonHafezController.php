@@ -49,19 +49,30 @@ class PersonHafezController extends Controller
         }
 
 
-        // Check if no query parameters are present
-        if (!$request->hasAny(['hafez_id', 'person_id', 'month', 'year'])) {
-            // If no query parameters, return all records
-            $hawafez = $query->get();
-            return response()->json(['data'=>$hawafez, 'message'=>'All Hawafez Returned Successfully!'], 200);
-        }
-
         // Get the filtered results
         $hawafez = $query->get();
+
+
     
-        if(empty($khosoomat))
+        if(empty($hawafez))
             return response()->json(['message'=>'لا يوجد أي حوافز مسجلة'], 404);
-        return response()->json(['data'=>$hawafez, 'message'=>'All Hawafez Returned Successfully!'], 200);
+
+        $i=0;
+        foreach($hawafez as $hafez)
+        {
+            $person = $hafez->person;
+            
+            $response[$i]['HafezID'] = $hafez->HafezID;
+            $response[$i]['PersonID'] = $hafez->PersonID;
+            $response[$i]['PersonFullName'] = $person->FirstName." ".$person->SecondName." ".$person->ThirdName;
+            $response[$i]['PersonCode'] = $person->LandlineNumber;
+            $response[$i]['HafezDate'] = $hafez->HafezDate;
+            $response[$i]['HafezReason'] = $hafez->HafezReason;
+            $response[$i]['HafezValue'] = $hafez->HafezValue;
+
+            $i++;
+        }
+        return response()->json(['data'=>$response, 'message'=>'All Hawafez Returned Successfully!'], 200);
     }
 
     public function insert(Request $request)
@@ -70,10 +81,8 @@ class PersonHafezController extends Controller
             'person_id' => 'required|integer|exists:PersonInformation,PersonID',
             'hafez_date' => 'required|date_format:Y-m-d',
             'hafez_value' => 'required',
-            'hafez_reason' => 'sometimes|text'
+            'hafez_reason' => 'required'
         ]);
-
-        return $validated;
 
         $hafezDate = $validated['hafez_date'];
         $personId = $validated['person_id'];
@@ -85,7 +94,7 @@ class PersonHafezController extends Controller
                 'PersonID' => $personId,
                 'HafezDate' => $hafezDate,
                 'HafezValue' => $hafezValue,
-                'HafezReaons' => $hafezReason
+                'HafezReason' => $hafezReason
             ]);
             
 
@@ -116,7 +125,7 @@ class PersonHafezController extends Controller
         
         $validated = $request->validate([
             'hafez_date' => 'required|date_format:Y-m-d',
-            'hafez_reason' => 'required|text',
+            'hafez_reason' => 'required',
             'hafez_value' => 'required'
         ]);
         

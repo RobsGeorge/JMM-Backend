@@ -23,8 +23,14 @@ class PersonHafez extends Model
         'HafezReason'
     ];
 
-    protected $table = "PesonHawafez";
+    protected $table = "PersonHawafez";
     protected $primaryKey = 'HafezID';
 
     public $timestamps = false;
+
+    public function person()
+    {
+        return $this->belongsTo(Person::class, 'PersonID')->where('IsDeleted', 0);
+    }
+
 }

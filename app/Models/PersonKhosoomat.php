@@ -28,4 +28,10 @@ class PersonKhosoomat extends Model
 
     public $timestamps = false;
 
+    public function person()
+    {
+        return $this->belongsTo(Person::class, 'PersonID')->where('IsDeleted', 0);
+    }
+
+
 }

@@ -62,7 +62,7 @@ class PersonSolfaController extends Controller
             'person_id' => 'required|integer|exists:PersonInformation,PersonID',
             'solfa_date' => 'required|date_format:Y-m-d',
             'solfa_value' => 'required',
-            'solfa_reason' => 'sometimes|text'
+            'solfa_reason' => 'required'
         ]);
 
         $solfaDate = $validated['solfa_date'];
@@ -106,7 +106,7 @@ class PersonSolfaController extends Controller
         
         $validated = $request->validate([
             'solfa_date' => 'required|date_format:Y-m-d',
-            'solfa_reason' => 'required|text',
+            'solfa_reason' => 'required',
             'solfa_value' => 'required'
         ]);
         
