@@ -36,7 +36,7 @@ class PersonVacationsController extends Controller
         if ($request->has('vacation_id')) {
             $vacation = $query->find($request->vacation_id);
             if (!$vacation) {
-                return response()->json(['message' => 'Vacation not found'], 404);
+                return response()->json(['message' => 'Vacation not found'], 200);
             }
             $person = $vacation->personInformation;
             $vacationType = $vacation->vacationType;
@@ -58,7 +58,7 @@ class PersonVacationsController extends Controller
         if ($request->has('person_id')) {
             $vacation = PersonVacations::where('PersonID', $request->person_id);
             if(!$vacation)
-                return response()->json(['message' => 'لا يوجد أجازات مسجلة لهذا الموظف'], 404);
+                return response()->json(['message' => 'لا يوجد أجازات مسجلة لهذا الموظف'], 200);
             $query->where('PersonID', $request->person_id)->orderBy('VacationDate', 'desc');
         }
         
@@ -84,7 +84,7 @@ class PersonVacationsController extends Controller
         $vacations = $query->get();
 
         if($vacations->isEmpty()){
-            return response()->json(['message'=>'لا يوجد أي أجازات مسجلة'], 404);
+            return response()->json(['message'=>'لا يوجد أي أجازات مسجلة'], 200);
         }
         
         $response = array();
@@ -221,7 +221,7 @@ class PersonVacationsController extends Controller
         
         // Check if vacation type exists
         if (!$vacation) {
-            return response()->json(['message' => 'Vacation not found'], 404);
+            return response()->json(['message' => 'Vacation not found'], 200);
         }
 
         $personId = $vacation->PersonID;
@@ -280,7 +280,7 @@ class PersonVacationsController extends Controller
         
         // Check if vacation type exists
         if (!$vacation) {
-            return response()->json(['message' => 'Vacation not found'], 404);
+            return response()->json(['message' => 'Vacation not found'], 200);
         }
 
         $vacationDate = Carbon::createFromFormat('Y-m-d', $vacation->VacationDate);
