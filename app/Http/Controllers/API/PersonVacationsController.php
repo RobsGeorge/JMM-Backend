@@ -83,7 +83,7 @@ class PersonVacationsController extends Controller
         // Get the filtered results
         $vacations = $query->get();
 
-        if(empty($query)){
+        if($vacations->isEmpty()){
             return response()->json(['message'=>'لا يوجد أي أجازات مسجلة'], 404);
         }
         
