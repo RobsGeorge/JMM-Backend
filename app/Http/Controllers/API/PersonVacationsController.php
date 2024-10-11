@@ -38,7 +38,18 @@ class PersonVacationsController extends Controller
             if (!$vacation) {
                 return response()->json(['message' => 'Vacation not found'], 404);
             }
-            return response()->json(['data' => $vacation, 'message' => 'Vacation Returned Successfully'], 200);
+            $person = $vacation->personInformation;
+            $vacationType = $vacation->vacationType;
+
+            $response['PersonVacationID'] = $vacation->PersonVacationID;
+            $response['PersonID'] = $vacation->PersonID;
+            $response['VacationDate'] = $vacation->VacationDate;
+            $response['PersonFullName'] = $person->FirstName." ".$person->SecondName." ".$person->ThirdName;
+            $response['PersonCode'] = $person->LandlineNumber;
+            $response['VacationTypeID'] = $vacation->VacationTypeID;
+            $response['VacationTypeName'] = $vacationType->VacationTypeName;
+
+            return response()->json(['data' => $response, 'message' => 'Vacation Returned Successfully'], 200);
         }
 
         
@@ -68,19 +79,29 @@ class PersonVacationsController extends Controller
             $query->where('VacationTypeID', $request->vacation_type_id)->orderBy('VacationDate', 'desc');
         }
 
-        // Check if no query parameters are present
-        if (!$request->hasAny(['person_id', 'month', 'year', 'vacation_type_id'])) {
-            // If no query parameters, return all records
-            $vacations = $query->get();
-            return response()->json(['data'=>$vacations, 'message'=>'All Vacations Returned Successfully!'], 200);
-        }
 
         // Get the filtered results
         $vacations = $query->get();
-    
+        $i=0;
+        foreach($vacations as $vacation)
+        {
+            $person = $vacation->personInformation;
+            $vacationType = $vacation->vacationType;
+            
+            $response[$i]['PersonVacationID'] = $vacation->PersonVacationID;
+            $response[$i]['PersonID'] = $vacation->PersonID;
+            $response[$i]['VacationDate'] = $vacation->VacationDate;
+            $response[$i]['PersonFullName'] = $person->FirstName." ".$person->SecondName." ".$person->ThirdName;
+            $response[$i]['PersonCode'] = $person->LandlineNumber;
+            $response[$i]['VacationTypeID'] = $vacation->VacationTypeID;
+            $response[$i]['VacationTypeName'] = $vacationType->VacationTypeName;
+
+            $i++;
+        }
+        
         if(empty($vacations))
             return response()->json(['message'=>'لا يوجد أي أجازات مسجلة'], 404);
-        return response()->json(['data'=>$vacations, 'message'=>'All Vacations Returned Successfully!'], 200);
+        return response()->json(['data'=>$response, 'message'=>'All Vacations Returned Successfully!'], 200);
     }
 
     public function insert(Request $request)
