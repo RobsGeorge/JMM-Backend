@@ -72,7 +72,7 @@ class PersonYearlyVacationLimits extends Controller
         $validated = $request->validate([
             'person_id' => 'required|exists:PersonInformation,PersonID',
             'vacation_type_id' => 'required|integer|exists:VacationTypesTable,VacationTypeID',
-            'year' => 'required|integer|min:1900,
+            'year' => 'required|integer|min:1900',
             'vacation_limit_per_year' => 'required|integer',
         ]);
 
