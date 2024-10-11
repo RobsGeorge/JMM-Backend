@@ -83,9 +83,11 @@ class PersonVacationsController extends Controller
         // Get the filtered results
         $vacations = $query->get();
 
-        if(empty($vacations))
+        if(empty($query)){
             return response()->json(['message'=>'لا يوجد أي أجازات مسجلة'], 404);
+        }
         
+        $response = array();
         $i=0;
         foreach($vacations as $vacation)
         {
@@ -102,7 +104,7 @@ class PersonVacationsController extends Controller
 
             $i++;
         }
-        
+
         return response()->json(['data'=>$response, 'message'=>'All Vacations Returned Successfully!'], 200);
     }
 
