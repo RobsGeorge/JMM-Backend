@@ -4,6 +4,7 @@ namespace App\Http\Controllers\API;
 
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use App\Models\PersonAttendance;
 use \Illuminate\Http\Response;
 use App\Models\YearlyOfficialVacations;
 
@@ -96,6 +97,17 @@ class YearlyOfficialVacationsController extends Controller
             
 
             if ($vacation->save()) {
+                $attendances = PersonAttendance::where('AttendanceDate', $vacationDate)->get();
+                
+                if($attendances)
+                {
+                    foreach($attendances as $attendance)
+                    {
+                        $attendance->IsCompanyOnVacation = 1;
+                        $attendance->YearlyVacationID = $vacation->VacationID;
+                        $attendance->save();
+                    } 
+                }
                 return response()->json([
                     'data' => $vacation,
                     'message' => 'تم تسجيل الأجازة بنجاح'
@@ -180,6 +192,18 @@ class YearlyOfficialVacationsController extends Controller
         // Check if vacation type exists
         if (!$vacation) {
             return response()->json(['message' => 'Vacation not found'], 200);
+        }
+
+        $attendances = PersonAttendance::where('AttendanceDate', $vacation->VacationDate)->get();
+                
+        if($attendances)
+        {
+            foreach($attendances as $attendance)
+            {
+                $attendance->IsCompanyOnVacation = 0;
+                $attendance->YearlyVacationID = null;
+                $attendance->save();
+            } 
         }
 
         if($vacation->delete())
