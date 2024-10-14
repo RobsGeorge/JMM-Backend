@@ -33,9 +33,9 @@ class PersonHafezController extends Controller
             $response['PersonID'] = $hafez->PersonID;
             $response['PersonFullName'] = $person->FirstName." ".$person->SecondName." ".$person->ThirdName;
             $response['PersonCode'] = $person->LandlineNumber;
-            $response['KhasmDate'] = $hafez->KhasmDate;
-            $response['KhasmReason'] = $hafez->KhasmReason;
-            $response['KhasmValue'] = $hafez->KhasmValue;
+            $response['HafezDate'] = $hafez->HafezDate;
+            $response['HafezReason'] = $hafez->HafezReason;
+            $response['HafezValue'] = $hafez->HafezValue;
 
             return response()->json(['data' => $response, 'message' => 'Hafez Returned Successfully'], 200);
         }
