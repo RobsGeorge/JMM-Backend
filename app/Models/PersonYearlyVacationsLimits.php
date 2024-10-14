@@ -34,4 +34,9 @@ class PersonYearlyVacationsLimits extends Model
     {
         return $this->belongsTo(Person::class, 'PersonID');
     }
+
+    public function vacationType()
+    {
+        return $this->belongsTo(VacationType::class, 'VacationTypeID', 'VacationTypeID');
+    }
 }

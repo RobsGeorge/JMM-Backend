@@ -4,6 +4,7 @@ namespace App\Http\Controllers\API;
 
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use App\Models\PersonVacations;
 use App\Models\PersonYearlyVacationsLimits;
 
 class PersonYearlyVacationLimits extends Controller
@@ -25,7 +26,7 @@ class PersonYearlyVacationLimits extends Controller
             if (!$limit) {
                 return response()->json(['message' => 'Limit not found'], 200);
             }
-            return response()->json(['data' => $limit, 'message' => 'Khasm Returned Successfully'], 200);
+            return response()->json(['data' => $limit, 'message' => 'Limit Returned Successfully'], 200);
         }
 
         
@@ -62,9 +63,72 @@ class PersonYearlyVacationLimits extends Controller
         // Get the filtered results
         $limits = $query->get();
     
-        if(empty($khosoomat))
+        if(empty($limits))
             return response()->json(['message'=>'لا يوجد أي معلومات مسجلة'], 200);
-        return response()->json(['data'=>$khosoomat, 'message'=>'All Limits Returned Successfully!'], 200);
+        return response()->json(['data'=>$limits, 'message'=>'All Limits Returned Successfully!'], 200);
+    }
+
+    public function getRemaining(Request $request)  {
+
+        $request->validate([
+            'limit_id' => 'sometimes|exists:PersonYearlyVacationsLimits,ID',
+            'person_id' => 'sometimes|exists:PersonInformation,PersonID',
+            'vacation_type_id' => 'sometimes|Integer|exists:VacationTypesTable,VacationTypeID',
+            'year' => 'sometimes|integer|min:1900',
+        ]);
+
+        // Start building the query
+        $query = PersonYearlyVacationsLimits::query();
+
+        if ($request->has('limit_id')) {
+            $limit = $query->find($request->limit_id);
+            if (!$limit) {
+                return response()->json(['message' => 'Limit not found'], 200);
+            }
+
+            $countOfVacationsUsedInCurrentYear = PersonVacations::whereYear('VacationDate', $limit->Year)->where('PersonID', $limit->PersonID)->count();
+            $person = $limit->person;
+            $data = [
+                'PersonID' => $limit->PersonID,
+                'PersonName' => $person->FirstName.' '.$person->SecondName.' '.$person->ThirdName,
+                'VacationTypeID' => $limit->VacationTypeID,
+                'VacationTypeName' =>  $limit->vacationType->VacationTypeName,
+                'Year' => $limit->Year,
+                'TotalVacations' => $limit->VacationLimit,
+                'RemainingVacations' => $limit->VacationLimit - $countOfVacationsUsedInCurrentYear,
+                
+            ];
+            return response()->json(['data' => $data, 'message' => 'Remaining Limit Returned Successfully'], 200);
+        }
+
+        
+        // Filter by person_id
+        if ($request->has('person_id')) {
+            $limit = PersonYearlyVacationsLimits::where('PersonID', $request->person_id);
+            if(!$limit)
+                return response()->json(['message' => 'لا يوجد حد أجازات مسجلة لهذا الموظف'], 200);
+            $query->where('PersonID', $request->person_id)->orderBy('Year', 'desc');
+        }
+
+        // Filter by person_id
+        if ($request->has('vacation_type_id')) {
+            $limit = PersonYearlyVacationsLimits::where('VacationTypeID', $request->vacation_type_id);
+            if(!$limit)
+                return response()->json(['message' => 'لا يوجد حد أجازات مسجلة لهذا النوع من الأجازة'], 200);
+            $query->where('VacationTypeID', $request->vacation_type_id)->orderBy('Year', 'desc');
+        }
+
+        // Filter by year
+        if ($request->has('year')) {
+            $query->whereYear('Year', $request->year)->orderBy('Year', 'desc');
+        }
+
+        // Get the filtered results
+        $limits = $query->get();
+    
+        if(empty($limits))
+            return response()->json(['message'=>'لا يوجد أي معلومات مسجلة'], 200);
+        return response()->json(['data'=>$limits, 'message'=>'All Limits Returned Successfully!'], 200);
     }
 
     public function insert(Request $request)
