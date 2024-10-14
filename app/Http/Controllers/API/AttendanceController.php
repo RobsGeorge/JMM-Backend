@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers\API;
 
-
+use Illuminate\Support\Facades\Log;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Carbon\Carbon;
@@ -67,13 +67,15 @@ class AttendanceController extends Controller
             }
 
             $query->whereDate('AttendanceDate', $date);
-
-            $attendances = $query->with(['personInformation:PersonID,FirstName,SecondName,ThirdName,LandlineNumber'])
-                                ->select('PersonID', 'AttendanceDate', 'WorkStartTime', 'WorkEndTime', 'IsAbsent', 'IsWeeklyVacation', 'IsCompanyOnVacation', 'IsPersonalVacation')
-                                ->orderBy('AttendanceDate', 'asc')
-                                ->orderBy('PersonID', 'asc')
-                                ->get();
-
+            
+            $attendances = $query->with(['personInformation' => function ($query) {
+                $query->select('PersonID', 'FirstName', 'SecondName', 'ThirdName', 'LandlineNumber', 'IsDeleted')
+                      ->where('IsDeleted', 0);
+                }])->select('PersonID', 'AttendanceDate', 'WorkStartTime', 'WorkEndTime', 'IsAbsent', 'IsWeeklyVacation', 'IsCompanyOnVacation', 'IsPersonalVacation')
+                ->orderBy('AttendanceDate', 'asc')
+                ->orderBy('PersonID', 'asc')
+                ->get();
+            
             $formattedData = $this->formatAttendanceByDate($attendances, $date);
 
             if(empty($formattedData))
@@ -99,11 +101,13 @@ class AttendanceController extends Controller
 
             $query->whereBetween('AttendanceDate', [$startDate, $endDate]);
 
-            $attendances = $query->with(['personInformation:PersonID,FirstName,SecondName,ThirdName,LandlineNumber'])
-                                ->select('PersonID', 'AttendanceDate', 'WorkStartTime', 'WorkEndTime', 'IsAbsent', 'IsWeeklyVacation', 'IsCompanyOnVacation', 'IsPersonalVacation')
-                                ->orderBy('AttendanceDate', 'asc')
-                                ->orderBy('PersonID', 'asc')
-                                ->get();
+            $attendances = $query->with(['personInformation' => function ($query) {
+                $query->select('PersonID', 'FirstName', 'SecondName', 'ThirdName', 'LandlineNumber', 'IsDeleted')
+                      ->where('IsDeleted', 0);
+                }])->select('PersonID', 'AttendanceDate', 'WorkStartTime', 'WorkEndTime', 'IsAbsent', 'IsWeeklyVacation', 'IsCompanyOnVacation', 'IsPersonalVacation')
+                ->orderBy('AttendanceDate', 'asc')
+                ->orderBy('PersonID', 'asc')
+                ->get();
 
             
             // Format response for multiple attendances in a month
@@ -116,11 +120,13 @@ class AttendanceController extends Controller
             
             $query->where('PersonID', $personId);
 
-            $attendances = $query->with(['personInformation:PersonID,FirstName,SecondName,ThirdName,LandlineNumber'])
-                                ->select('PersonID', 'AttendanceDate', 'WorkStartTime', 'WorkEndTime', 'IsAbsent', 'IsWeeklyVacation', 'IsCompanyOnVacation', 'IsPersonalVacation')
-                                ->orderBy('AttendanceDate', 'asc')
-                                ->orderBy('PersonID', 'asc')
-                                ->get();
+            $attendances = $query->with(['personInformation' => function ($query) {
+                $query->select('PersonID', 'FirstName', 'SecondName', 'ThirdName', 'LandlineNumber', 'IsDeleted')
+                      ->where('IsDeleted', 0);
+                }])->select('PersonID', 'AttendanceDate', 'WorkStartTime', 'WorkEndTime', 'IsAbsent', 'IsWeeklyVacation', 'IsCompanyOnVacation', 'IsPersonalVacation')
+                ->orderBy('AttendanceDate', 'asc')
+                ->orderBy('PersonID', 'asc')
+                ->get();
 
             $formattedData = $this->formatAttendanceByPerson($attendances);
 
@@ -128,11 +134,13 @@ class AttendanceController extends Controller
         }
 
         // If no parameters are provided, return all attendances for all persons
-        $attendances = $query->with(['personInformation:PersonID,FirstName,SecondName,ThirdName,LandlineNumber'])
-                            ->select('PersonID', 'AttendanceDate', 'WorkStartTime', 'WorkEndTime', 'IsAbsent', 'IsWeeklyVacation', 'IsCompanyOnVacation', 'IsPersonalVacation')
-                            ->orderBy('AttendanceDate', 'asc')
-                            ->orderBy('PersonID', 'asc')
-                            ->get();
+        $attendances = $query->with(['personInformation' => function ($query) {
+            $query->select('PersonID', 'FirstName', 'SecondName', 'ThirdName', 'LandlineNumber', 'IsDeleted')
+                  ->where('IsDeleted', 0);
+            }])->select('PersonID', 'AttendanceDate', 'WorkStartTime', 'WorkEndTime', 'IsAbsent', 'IsWeeklyVacation', 'IsCompanyOnVacation', 'IsPersonalVacation')
+            ->orderBy('AttendanceDate', 'asc')
+            ->orderBy('PersonID', 'asc')
+            ->get();
 
         $formattedData = $this->formatAttendanceByPerson($attendances);
 
@@ -146,66 +154,69 @@ class AttendanceController extends Controller
         $data = [];
         $daysInMonth = Carbon::createFromFormat('Y-m', $month)->daysInMonth;
 
-        foreach ($attendances->groupBy('PersonID') as $personId => $records) {
+        foreach ($attendances->groupBy('PersonID') as $personId => $records) 
+        {
             $person = $records->first()->personInformation;
+            if(!empty($person))
+            {
+                $attendanceDays = [];
+                for ($day = 1; $day <= $daysInMonth; $day++) {
+                    $attendanceForDay = $records->firstWhere('AttendanceDate', Carbon::createFromFormat('Y-m-d', $month . '-' . $day)->toDateString());
 
-            $attendanceDays = [];
-            for ($day = 1; $day <= $daysInMonth; $day++) {
-                $attendanceForDay = $records->firstWhere('AttendanceDate', Carbon::createFromFormat('Y-m-d', $month . '-' . $day)->toDateString());
+                    $attendanceDays[] = [
+                        'Day' => $day,
+                        'WorkStartTime' => optional($attendanceForDay)->WorkStartTime ?? null,
+                        'WorkEndTime' => optional($attendanceForDay)->WorkEndTime,
+                        'IsAbsent' => optional($attendanceForDay)->IsAbsent ?? null,
+                        'IsWeeklyVacation' => optional($attendanceForDay)->IsWeeklyVacation ?? null,
+                        'IsCompanyOnVacation' => optional($attendanceForDay)->IsCompanyOnVacation ?? null,
+                        'IsPersonalVacation' => optional($attendanceForDay)->IsPersonalVacation ?? null,
+                    ];
+                }
 
-                $attendanceDays[] = [
-                    'Day' => $day,
-                    'WorkStartTime' => optional($attendanceForDay)->WorkStartTime ?? null,
-                    'WorkEndTime' => optional($attendanceForDay)->WorkEndTime,
-                    'IsAbsent' => optional($attendanceForDay)->IsAbsent ?? null,
-                    'IsWeeklyVacation' => optional($attendanceForDay)->IsWeeklyVacation ?? null,
-                    'IsCompanyOnVacation' => optional($attendanceForDay)->IsCompanyOnVacation ?? null,
-                    'IsPersonalVacation' => optional($attendanceForDay)->IsPersonalVacation ?? null,
+                $data[] = [
+                    'PersonID' => $person->PersonID,
+                    'FirstName' => $person->FirstName,
+                    'SecondName' => $person->SecondName,
+                    'ThirdName' => $person->ThirdName,
+                    'LandlineNumber' => $person->LandlineNumber,
+                    'attendance' => $attendanceDays,
                 ];
             }
-
-            $data[] = [
-                'PersonID' => $person->PersonID,
-                'FirstName' => $person->FirstName,
-                'SecondName' => $person->SecondName,
-                'ThirdName' => $person->ThirdName,
-                'LandlineNumber' => $person->LandlineNumber,
-                'attendance' => $attendanceDays,
-            ];
         }
-
         return $data;
     }
 
     protected function formatAttendanceByDate($attendances, $date)
     {
         $data = [];
-
         // Group the attendances by PersonID to get each person's record for the given date
-        foreach ($attendances->groupBy('PersonID') as $personId => $records) {
+        foreach ($attendances->groupBy('PersonID') as $personId => $records) 
+        {
             // Get the person's information
             $person = $records->first()->personInformation;
 
-            // Get the attendance for the specified date (since we're grouping by PersonID, there should be only one record per person for this date)
-            $attendance = $records->firstWhere('AttendanceDate', $date);
-
-            // Add each person's attendance to the final array
-            $data[] = [
-                'PersonID' => $person->PersonID,
-                'FirstName' => $person->FirstName,
-                'SecondName' => $person->SecondName,
-                'ThirdName' => $person->ThirdName,
-                'LandlineNumber' => $person->LandlineNumber,
-                'AttendanceDate' => $attendance->AttendanceDate,
-                'WorkStartTime' => $attendance->WorkStartTime,
-                'WorkEndTime' => $attendance->WorkEndTime,
-                'IsAbsent' => $attendance->IsAbsent,
-                'IsWeeklyVacation' => $attendance->IsWeeklyVacation,
-                'IsCompanyOnVacation' => $attendance->IsCompanyOnVacation,
-                'IsPersonalVacation' => $attendance->IsPersonalVacation
-            ];
+            if(!empty($person))
+            {
+                // Get the attendance for the specified date (since we're grouping by PersonID, there should be only one record per person for this date)
+                $attendance = $records->firstWhere('AttendanceDate', $date);
+                // Add each person's attendance to the final array
+                $data[] = [
+                    'PersonID' => $person->PersonID,
+                    'FirstName' => $person->FirstName,
+                    'SecondName' => $person->SecondName,
+                    'ThirdName' => $person->ThirdName,
+                    'LandlineNumber' => $person->LandlineNumber,
+                    'AttendanceDate' => $attendance->AttendanceDate,
+                    'WorkStartTime' => $attendance->WorkStartTime,
+                    'WorkEndTime' => $attendance->WorkEndTime,
+                    'IsAbsent' => $attendance->IsAbsent,
+                    'IsWeeklyVacation' => $attendance->IsWeeklyVacation,
+                    'IsCompanyOnVacation' => $attendance->IsCompanyOnVacation,
+                    'IsPersonalVacation' => $attendance->IsPersonalVacation
+                ];
+            }
         }
-
         return $data;
     }
 
@@ -221,31 +232,32 @@ class AttendanceController extends Controller
         // Group attendances by PersonID
         foreach ($attendances as $attendance) {
             $personId = $attendance->PersonID;
+            if(!empty($personId))
+            {
+                // Initialize a new entry for the person if not already done
+                if (!isset($formattedData[$personId])) {
+                    $formattedData[$personId] = [
+                        'PersonID' => $personId,
+                        'FirstName' => $attendance->personInformation->FirstName,
+                        'SecondName' => $attendance->personInformation->SecondName,
+                        'ThirdName' => $attendance->personInformation->ThirdName,
+                        'LandlineNumber' => $attendance->personInformation->LandlineNumber,
+                        'attendance' => [], // Initialize the attendance array
+                    ];
+                }
 
-            // Initialize a new entry for the person if not already done
-            if (!isset($formattedData[$personId])) {
-                $formattedData[$personId] = [
-                    'PersonID' => $personId,
-                    'FirstName' => $attendance->personInformation->FirstName,
-                    'SecondName' => $attendance->personInformation->SecondName,
-                    'ThirdName' => $attendance->personInformation->ThirdName,
-                    'LandlineNumber' => $attendance->personInformation->LandlineNumber,
-                    'attendance' => [], // Initialize the attendance array
+                // Add the attendance details for this person
+                $formattedData[$personId]['attendance'][] = [
+                    'AttendanceDate' => $attendance->AttendanceDate, // Get the day of the month
+                    'WorkStartTime' => $attendance->WorkStartTime,
+                    'WorkEndTime' => $attendance->WorkEndTime,
+                    'IsAbsent' => (int) $attendance->IsAbsent,
+                    'IsWeeklyVacation' => (int) $attendance->IsWeeklyVacation,
+                    'IsCompanyOnVacation' => (int) $attendance->IsCompanyOnVacation,
+                    'IsPersonalVacation' => (int) $attendance->IsPersonalVacation,
                 ];
             }
-
-            // Add the attendance details for this person
-            $formattedData[$personId]['attendance'][] = [
-                'AttendanceDate' => $attendance->AttendanceDate, // Get the day of the month
-                'WorkStartTime' => $attendance->WorkStartTime,
-                'WorkEndTime' => $attendance->WorkEndTime,
-                'IsAbsent' => (int) $attendance->IsAbsent,
-                'IsWeeklyVacation' => (int) $attendance->IsWeeklyVacation,
-                'IsCompanyOnVacation' => (int) $attendance->IsCompanyOnVacation,
-                'IsPersonalVacation' => (int) $attendance->IsPersonalVacation,
-            ];
         }
-
         // Return the formatted data as an array of persons
         return array_values($formattedData); // Reset array keys
     }
