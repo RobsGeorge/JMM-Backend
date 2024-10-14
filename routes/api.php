@@ -77,6 +77,7 @@ Route::put('/taameenat-data/update', [TaameenatConstantsController::class, 'upda
 Route::get('/attendance', [AttendanceController::class, 'getAttendance']);
 Route::post('/attendance', [AttendanceController::class, 'insertAttendance']);
 Route::put('/attendance', [AttendanceController::class, 'updateAttendance']);
+Route::delete('/attendance', [AttendanceController::class, 'deleteAttendance']);
 
 Route::get('/weekdays', [WeekDaysController::class, 'getWeekDays']);
 Route::put('/weekdays', [WeekDaysController::class, 'updateWeekDays']);

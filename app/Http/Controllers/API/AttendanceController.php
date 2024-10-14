@@ -30,7 +30,20 @@ class AttendanceController extends Controller
         {
             $exists = Person::select('PersonID')->where('PersonID', $personId)->where('IsDeleted','0')->exists();
             if(!$exists)
-                return response()->json(['message'=>'Person not found', 'status'=>400]);
+                return response()->json(['message'=>'Person not found', 'status'=>200]);
+        }
+
+        $existingRecords = PersonAttendance::where('AttendanceDate', $date)->get();
+        $personsIDs = Person::where('IsDeleted', 0)->pluck('PersonID')->toArray();
+
+        
+        if ($existingRecords->isNotEmpty()) {
+            $attendances = PersonAttendance::where('AttendanceDate', $date)->pluck('PersonID')->toArray();
+
+            if(count($existingRecords)!=count($personsIDs))
+            {
+                $personsIDs = array_diff($personsIDs, $attendances);
+            }
         }
         
 
@@ -47,31 +60,7 @@ class AttendanceController extends Controller
 
             $exists =  PersonAttendance::select('AttendanceID')->where('AttendanceDate', $date)->exists();
             if(!$exists)
-                return response()->json(['message'=>'لا يوجد أي كشوفات حضور او انصراف مسجلة لهذا التاريخ', 'status'=>400]);
-
-            
-            // Step 1: Check if any attendance for the given date is already in the database
-            $existingRecords = PersonAttendance::where('AttendanceDate', $date)->get();
-
-            if ($existingRecords->isEmpty()) {
-                // If attendance is not found for this specific date
-                return response()->json(['message' => 'لم يتم فتح كشف حضور وانصراف لهذا التاريخ. يجب انتظار اليوم نفسه وسيتم فتحه تلقائياً'], 200);
-            }
-            else{
-                // If attendance is found for this specific date
-                /*if ($this->isWeeklyVacation($date)) {
-                    return response()->json([
-                        'message' => 'هذا التاريخ هو أجازة أسبوعية لكل الموظفين'
-                    ], 200);
-                }*/
-                /*else if ($companyVacation = $this->getCompanyVacation($date)) {
-                    return response()->json([
-                        'message' => 'هذا التاريخ هو أجازة رسمية مدفوعة بمناسبة: '.$companyVacation->VacationName.''
-                    ], 200);
-                }*/
-            }
-
-            //$check = $this->addMissingEmployeesBeforeGettingAttendance($date);
+                return response()->json(['message'=>'لا يوجد أي كشوفات حضور او انصراف مسجلة لهذا التاريخ', 'status'=>200]);
 
             if ($personId) {
                 $query->where('PersonID', $personId);
@@ -88,7 +77,7 @@ class AttendanceController extends Controller
             $formattedData = $this->formatAttendanceByDate($attendances, $date);
 
             if(empty($formattedData))
-                return response()->json(['message' => 'لا يوجد أي كشوف حضور او انصراف مسجلة في هذا التاريخ'], 400);
+                return response()->json(['message' => 'لا يوجد أي كشوف حضور او انصراف مسجلة في هذا التاريخ'], 200);
 
             return response()->json(['AtendanceData' => $formattedData], 200);
         }
@@ -272,26 +261,35 @@ class AttendanceController extends Controller
             'date.date_format' => 'The attendance date must be in the format YYYY-MM-DD.',
         ]);
 
-        $date = $request->date;
+        $date = $validated['date'];
 
         // Step 1: Check if the attendance for the given date is already in the database
         $existingRecords = PersonAttendance::where('AttendanceDate', $date)->get();
+        $personsIDs = Person::where('IsDeleted', 0)->where('WorkStartDate', '<=', $date)->pluck('PersonID')->toArray();
 
+        
         if ($existingRecords->isNotEmpty()) {
-            // If attendance is already found for this date, return the message
-            return response()->json(['message' => 'كشف الحضور والانصراف موجود بالفعل لهذا التاريخ'], 200);
+            $attendances = PersonAttendance::where('AttendanceDate', $date)->pluck('PersonID')->toArray();
+
+            if(count($existingRecords)!=count($personsIDs))
+            {
+                $personsIDs = array_diff($personsIDs, $attendances);
+            }
+            else
+            {
+                return response()->json([
+                    'message' => 'كشف الحضور والانصراف موجود بالفعل لكل الموظفين'
+                ], 200);
+            }
         }
 
         // Step 2: Initialize attendance records array
         $attendanceRecords = [];
 
-        // Step 3: Fetch all employees
-        $employees = Person::all()->where('IsDeleted','=',0); // Fetch all active employees
-
         // Step 4: Check if the day is a weekly vacation and insert records
         if ($this->isWeeklyVacation($date)) {
-            foreach ($employees as $employee) {
-                $attendanceRecords[] = $this->createAttendanceRecord($employee->PersonID, $date, true, false, false);
+            foreach ($personsIDs as $personID) {
+                $attendanceRecords[] = $this->createAttendanceRecord($personID, $date, true, false, false);
             }
             return response()->json([
                 'message' => 'تم تسجيل حضور وانصراف اليوم على انه أجازة أسبوعية لكل الموظفين'
@@ -300,8 +298,8 @@ class AttendanceController extends Controller
 
         // Step 5: Check if the day is an official company vacation and insert records
         if ($companyVacation = $this->getCompanyVacation($date)) {
-            foreach ($employees as $employee) {
-                $this->createAttendanceRecord($employee->PersonID, $date, false, true, false, $companyVacation->VacationID);
+            foreach ($personsIDs as $personID) {
+                $this->createAttendanceRecord($personID, $date, false, true, false, $companyVacation->VacationID);
             }
             return response()->json([
                 'message' => 'تم تسجيل حضور وانصراف اليوم على انه أجازة رسمية مدفوعة لكل الموظفين',
@@ -309,11 +307,11 @@ class AttendanceController extends Controller
         }
 
         // Step 6: Create records for normal working days
-        foreach ($employees as $employee) {
-            $this->createAttendanceRecord($employee->PersonID, $date, false, false, false);
+        foreach ($personsIDs as $personID) {
+            $this->createAttendanceRecord($personID, $date, false, false, false);
 
             // Step 7: Check if the employee is on personal vacation for this date
-            $this->updateAttendanceWithVacationStatus($employee->PersonID, $date);
+            $this->updateAttendanceWithVacationStatus($personID, $date);
         }
 
         // Step 8: Return success response
@@ -411,7 +409,7 @@ class AttendanceController extends Controller
         
         // Check if the attendance record exists
         if (!$attendance) {
-            return response()->json(['message' => 'Attendance record not found.'], 200);
+            return response()->json(['message' => 'لا يوجد كشف مفتوح لهذا الشخص في هذا التاريخ'], 200);
         }
 
         // Track changes
@@ -449,23 +447,26 @@ class AttendanceController extends Controller
         }
     }
 
-
-    private function addMissingEmployeesBeforeGettingAttendance($date)
+    public function deleteAttendance(Request $request)
     {
-        $attendances = PersonAttendance::where('AttendanceDate', $date)->pluck('PersonID')->toArray();
-        $persons = Person::where('IsDeleted', 0)->pluck('PersonID')->toArray();
-        //return array_diff($persons, $attendances);
-            if(count($attendances) != count($persons))
-            {
-                //Add the missing employees that are not found in the attendance report of that day
-                $missingEmployeesIDs = array_diff($persons, $attendances);
-                foreach ($missingEmployeesIDs as $employeeID) {
-                    $this->createAttendanceRecord($employeeID, $date, false, true, false);
-                }
-            }
+        $validated = $request->validate([
+            'date' => 'required|date_format:Y-m-d',
+        ]);
+        $date = $validated['date'];
+
+        $existingRecords = PersonAttendance::where('AttendanceDate', $date)->get();
         
-        $attendances = PersonAttendance::where('AttendanceDate', $date)->pluck('PersonID')->toArray();
-        return true;
+        if ($existingRecords->isNotEmpty()) {
+            foreach($existingRecords as $record)
+            {
+                $record->delete();
+            }
+            return response()->json(['message' => 'تم حذف البيانات بنجاح'], 200);
+        }
+        else
+        {
+            return  response()->json(['message' => 'No attendance records found for the given date.'], 200);
+        }
     }
 
 
