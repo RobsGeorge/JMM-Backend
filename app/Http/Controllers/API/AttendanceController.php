@@ -105,7 +105,7 @@ class AttendanceController extends Controller
                                 ->orderBy('PersonID', 'asc')
                                 ->get();
 
-            return $attendances;
+            
             // Format response for multiple attendances in a month
             $formattedData = $this->formatAttendanceByMonth($attendances, $month);
             return response()->json($formattedData, 200);
