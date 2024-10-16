@@ -40,63 +40,61 @@ class AbsenceController extends Controller
             $response = array();
             $person = $absence->person;
 
-            $response['HafezID'] = $khasm->HafezID;
-            $response['PersonID'] = $khasm->PersonID;
+            $response['AbsenceID'] = $absence->AbsenceID;
+            $response['PersonID'] = $absence->PersonID;
             $response['PersonFullName'] = $person->FirstName." ".$person->SecondName." ".$person->ThirdName;
             $response['PersonCode'] = $person->LandlineNumber;
-            $response['KhasmDate'] = $khasm->KhasmDate;
-            $response['KhasmReason'] = $khasm->KhasmReason;
-            $response['KhasmValue'] = $khasm->KhasmValue;
+            $response['AbsenceDate'] = $absence->AbsenceDate;
+            $response['AbsenceReason'] = $absence->AbsenceReason;
 
-            return response()->json(['data' => $response, 'message' => 'Khasm Returned Successfully'], 200);
+            return response()->json(['data' => $response, 'message' => 'Absence Returned Successfully'], 200);
         }
 
         
 
         // Filter by person_id
         if ($request->has('person_id')) {
-            $khasm = PersonKhosoomat::where('PersonID', $request->person_id);
-            if(!$khasm)
-                return response()->json(['message' => 'لا يوجد خصومات مسجلة لهذا الموظف'], 200);
-            $query->where('PersonID', $request->person_id)->orderBy('KhasmDate', 'desc');
+            $absence = PersonAbsence::where('PersonID', $request->person_id);
+            if(!$absence)
+                return response()->json(['message' => 'لا يوجد غيابات مسجلة لهذا الموظف'], 200);
+            $query->where('PersonID', $request->person_id)->orderBy('AbsenceDate', 'desc');
         }
         
         // Filter by month
         if ($request->has('month')) {
             // Extract the year and month from the input
             [$year, $month] = explode('-', $request->month);
-            $query->whereMonth('KhasmDate', $month)->whereYear('HafezDate', $year)->orderBy('KhasmDate', 'desc');
+            $query->whereMonth('AbsenceDate', $month)->whereYear('AbsenceDate', $year)->orderBy('AbsenceDate', 'desc');
         }
 
         // Filter by year
         if ($request->has('year')) {
-            $query->whereYear('KhasmDate', $request->year)->orderBy('KhasmDate', 'desc');
+            $query->whereYear('AbsenceDate', $request->year)->orderBy('AbsenceDate', 'desc');
         }
 
 
         // Get the filtered results
-        $khosoomat = $query->get();
+        $absences = $query->get();
         //return $khosoomat;
-        if($khosoomat->isEmpty())
-            return response()->json(['message'=>'لا يوجد أي خصومات مسجلة'], 200);
+        if($absences->isEmpty())
+            return response()->json(['message'=>'لا يوجد أي غيابات مسجلة'], 200);
 
         $response = array();
         $i=0;
-        foreach($khosoomat as $khasm)
+        foreach($absences as $absence)
         {
-            $person = $khasm->person;
+            $person = $absence->person;
             
-            $response[$i]['KhasmID'] = $khasm->KhasmID;
-            $response[$i]['PersonID'] = $khasm->PersonID;
+            $response[$i]['AbsenceID'] = $absence->AbsenceID;
+            $response[$i]['PersonID'] = $absence->PersonID;
             $response[$i]['PersonFullName'] = $person->FirstName." ".$person->SecondName." ".$person->ThirdName;
             $response[$i]['PersonCode'] = $person->LandlineNumber;
-            $response[$i]['KhasmDate'] = $khasm->KhasmDate;
-            $response[$i]['KhasmReason'] = $khasm->KhasmReason;
-            $response[$i]['KhasmValue'] = $khasm->KhasmValue;
+            $response[$i]['AbsenceDate'] = $absence->AbsenceDate;
+            $response[$i]['AbsenceReason'] = $absence->AbsenceReason;
 
             $i++;
         }
-        return response()->json(['data'=>$response, 'message'=>'All Khosoomat Returned Successfully!'], 200);
+        return response()->json(['data'=>$response, 'message'=>'All Absences Returned Successfully!'], 200);
     }
 
     public function insertAbsence(Request $request)
