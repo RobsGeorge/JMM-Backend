@@ -143,3 +143,7 @@ Route::post('/payroll', [PayrollController::class, 'insertPayrollRecord']);
 Route::put('/payroll/{id}', [PayrollController::class, 'updatePayrollRecord']);
 Route::put('/close-payroll', [PayrollController::class, 'closePayroll']);
 
+Route::post('/close-payroll', [PayrollController::class, 'closePayroll']);
+Route::get('/get-payroll', [PayrollController::class, 'getPayroll']);
+Route::put('/delete-payroll', [PayrollController::class, 'deletePayroll']);
+

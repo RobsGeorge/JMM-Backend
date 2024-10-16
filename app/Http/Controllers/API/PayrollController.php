@@ -82,24 +82,12 @@ class PayrollController extends Controller
         return $payroll;
     }
 
-    public function closePayroll(Request $request)
-    {
-        $validated = $request->validator([
-            'month' => 'required|date_format:Y-m-d'
-        ]);
-
-        [$year, $month] = explode('-', $request->month);
-        $persons = Person::select('PersonID')->where('IsDeleted', 0);
-
-        
-    }
-
     public function updatePayrollRecord()
     {
 
     }
 
-    public function getPayroll(Request $request)
+    public function getPayrollRecord(Request $request)
     {
         //Payroll Can be fetched for all employees by certain month
         //or Fetcehd for a certain employee by certain month
@@ -137,8 +125,20 @@ class PayrollController extends Controller
         }
     }   
 
-    public function deletePayroll()
+    public function getPayroll()
     {
 
     }
+
+    public function closePayroll()
+    {
+
+    }
+    
+    public function deletePayroll()
+    {
+        
+    }
+
+
 }

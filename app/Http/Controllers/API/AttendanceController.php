@@ -287,6 +287,7 @@ class AttendanceController extends Controller
             if(count($existingRecords)!=count($personsIDs))
             {
                 $personsIDs = array_diff($personsIDs, $attendances);
+                return $personsIDs;
             }
             else
             {

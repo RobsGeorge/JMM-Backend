@@ -62,7 +62,9 @@ class PersonController extends Controller
             ->leftJoin('PersonSalary', 'PersonSalary.PersonID', '=', 'PersonInformation.PersonID')
             ->leftJoin('PersonTaameenValue', 'PersonTaameenValue.PersonID', '=', 'PersonInformation.PersonID')
             ->select('PersonInformation.*', 'PersonSalary.Salary', 'PersonSalary.VariableSalary', 'PersonTaameenValue.TaameenValue', 'JobsTable.JobName', 'DepartmentsTable.DepartmentName')
-            ->where('PersonInformation.IsDeleted','0')->get();
+            ->where('PersonInformation.IsDeleted','0')
+            ->orderBy('LandlineNumber', 'asc')
+            ->get();
         return response()->json(['data'=>$data, 'message'=>'All Persons Data Returned Successfully!'], 200);
     }
 
