@@ -123,12 +123,12 @@ class AbsenceController extends Controller
         if ($this->isWeeklyVacation($validated['absence_date'])) {
             return response()->json([
                 'message' => 'لا يمكن تسجيل غياب في هذا اليوم لأن هذا التاريخ هو أجازة أسبوعية لكل الموظفين'
-            ], 400);
+            ], 200);
         }
         else if ($companyVacation = $this->getCompanyVacation($validated['absence_date'])) {
             return response()->json([
                 'message' => 'لا يمكن تسجيل الغياب لأن هذا التاريخ هو أجازة رسمية مدفوعة بمناسبة: '.$companyVacation->VacationName.''
-            ], 400);
+            ], 200);
         }
         
         $existingAbsence = PersonAbsence::where('PersonID', $validated['person_id'])
