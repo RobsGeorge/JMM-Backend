@@ -51,7 +51,7 @@ class PersonSolfaController extends Controller
         if ($request->has('month')) {
             // Extract the year and month from the input
             [$year, $month] = explode('-', $request->month);
-            $query->whereMonth('SolfaDate', $month)->whereYear('HafezDate', $year)->orderBy('SolfaDate', 'desc');
+            $query->whereMonth('SolfaDate', $month)->whereYear('SolfaDate', $year)->orderBy('SolfaDate', 'desc');
         }
 
         // Filter by year
