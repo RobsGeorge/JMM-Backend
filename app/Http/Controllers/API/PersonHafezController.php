@@ -52,7 +52,7 @@ class PersonHafezController extends Controller
         if ($request->has('month')) {
             // Extract the year and month from the input
             [$year, $month] = explode('-', $request->month);
-            $query->whereMonth('HafezDate', $month)->orderBy('HafezDate', 'desc');
+            $query->whereMonth('HafezDate', $month)->whereYear('HafezDate', $year)->orderBy('HafezDate', 'desc');
         }
 
         // Filter by year
@@ -66,7 +66,7 @@ class PersonHafezController extends Controller
 
 
     
-        if(empty($hawafez))
+        if($hawafez->isEmpty())
             return response()->json(['message'=>'لا يوجد أي حوافز مسجلة'], 200);
         
         $response = array();
@@ -85,6 +85,7 @@ class PersonHafezController extends Controller
 
             $i++;
         }
+        
         return response()->json(['data'=>$response, 'message'=>'All Hawafez Returned Successfully!'], 200);
     }
 

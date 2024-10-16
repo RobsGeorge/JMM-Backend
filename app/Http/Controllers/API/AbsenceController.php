@@ -20,266 +20,98 @@ class AbsenceController extends Controller
 {
     public function getAbsence(Request $request)
     {
+
+        $request->validate([
+            'absence_id' => 'sometimes|exists:PersonAbsence,AbsenceID',
+            'person_id' => 'sometimes|exists:PersonInformation,PersonID',
+            'month' => 'sometimes|date_format:Y-m',
+            'year' => 'sometimes|integer|min:1900',
+        ]);
+
+
         $absenceId = $request->query('absence_id');
         $personId = $request->query('person_id');
-        $absenceDate = $request->query('absence_date');
         $month = $request->query('month');
         $year = $request->query('year');
 
-        if ($absenceId) {
-            // Get absence by AbsenceID
-            $absence = PersonAbsence::with('personInformation')->find($absenceId);
+        // Start building the query
+        $query = PersonAbsence::query();
+
+        if ($request->has('absence_id')) {
+            $absence = $query->find($absenceId);
             if (!$absence) {
                 return response()->json(['message' => 'Absence not found'], 200);
             }
 
-            $data = [
-                'AbsenceID' => $absence->AbsenceID,
-                'PersonID' => $absence->PersonID,
-                'FirstName' => $absence->personInformation->FirstName,
-                'SecondName' => $absence->personInformation->SecondName,
-                'ThirdName' => $absence->personInformation->ThirdName,
-                'LandlineNumber' => $absence->personInformation->LandlineNumber,
-                'AbsenceDate' => $absence->AbsenceDate,
-                'AbsenceReason' => $absence->AbsenceReason
-            ];
-            return response()->json(['data' => $data], 200);
+            $response = array();
+            $person = $absence->person;
+
+            $response['AbsenceID'] = $absence->AbsenceID;
+            $response['PersonID'] = $absence->PersonID;
+            $response['PersonFullName'] = $person->FirstName." ".$person->SecondName." ".$person->ThirdName;
+            $response['PersonCode'] = $person->LandlineNumber;
+            $response['AbsenceDate'] = $absence->AbsenceDate;
+            $response['AbsenceReason'] = $absence->AbsenceReason;
+
+            return response()->json(['data' => $response, 'message' => 'Absence Returned Successfully'], 200);
         }
 
-        if ($personId) {
-            if ($absenceDate) {
-                // Get all absences for the specified AbsenceDate
-                $absences = PersonAbsence::with('personInformation')->where('PersonID', $personId)->where('AbsenceDate', $absenceDate)->orderBy('AbsenceDate', 'desc')->get();
-                // Check if there are any absences
-                if ($absences->isEmpty()) {
-                    return response()->json(['message' => 'لا يوجد أي غيابات موجودة في هذا التاريخ لهذا الموظف'], 200);
-                }
-        
-                $groupedAbsences = $absences->groupBy('PersonID')->map(function ($absencesByPerson) {
-                    // Retrieve the first absence to extract the personal information
-                    $firstAbsence = $absencesByPerson->first();
-                    return [
-                        'PersonID' => $firstAbsence->PersonID,
-                        'FirstName' => $firstAbsence->personInformation->FirstName,
-                        'SecondName' => $firstAbsence->personInformation->SecondName,
-                        'ThirdName' => $firstAbsence->personInformation->ThirdName,
-                        'LandlineNumber' => $firstAbsence->personInformation->LandlineNumber,
-                        'absences' => $absencesByPerson->map(function ($absence) {
-                            return [
-                                'AbsenceID' => $absence->AbsenceID,
-                                'AbsenceDate' => $absence->AbsenceDate,
-                                'AbsenceReason' => $absence->AbsenceReason,
-                            ];
-                        })->toArray(), // Return as array
-                    ];
-                });
-    
-                return response()->json(['data' => $groupedAbsences], 200);
-            }
-            if ($month) {
-                // Extract the year and month from the input
-                [$year, $month] = explode('-', $month);
+        // Filter by person_id
+        if ($request->has('person_id')) {
 
-                // Get all absences for the specified PersonID and month
-                $absences = PersonAbsence::with('personInformation')
-                    ->where('PersonID', $personId)
-                    ->whereMonth('AbsenceDate', $month)
-                    ->whereYear('AbsenceDate', $year)
-                    ->orderBy('AbsenceDate', 'desc')
-                    ->get();
-                
-                // Check if there are any absences
-                if ($absences->isEmpty()) {
-                    return response()->json(['message' => 'لا يوجد أي غيابات موجودة في هذا الشهر لهذا الموظف'], 200);
-                }
-        
-                // Format the data
-                $groupedAbsences = $absences->groupBy('PersonID')->map(function ($absencesByPerson) {
-                    // Retrieve the first absence to extract the personal information
-                    $firstAbsence = $absencesByPerson->first();
-                    return [
-                        'PersonID' => $firstAbsence->PersonID,
-                        'FirstName' => $firstAbsence->personInformation->FirstName,
-                        'SecondName' => $firstAbsence->personInformation->SecondName,
-                        'ThirdName' => $firstAbsence->personInformation->ThirdName,
-                        'LandlineNumber' => $firstAbsence->personInformation->LandlineNumber,
-                        'absences' => $absencesByPerson->map(function ($absence) {
-                            return [
-                                'AbsenceID' => $absence->AbsenceID,
-                                'AbsenceDate' => $absence->AbsenceDate,
-                                'AbsenceReason' => $absence->AbsenceReason,
-                            ];
-                        })->toArray(), // Return as array
-                    ];
-                });
-                return response()->json(['data' => $groupedAbsences], 200);
-            }
-            if($year)
-            {
-                // Get all absences for the specified PersonID and month
-                $absences = PersonAbsence::with('personInformation')
-                    ->where('PersonID', $personId)
-                    ->whereYear('AbsenceDate', $year)
-                    ->orderBy('AbsenceDate', 'desc')
-                    ->get();
+            $absence = $query->where('PersonID', $personId)->get();
+            return $absence;
+            if(!$absence)
+                return response()->json(['message' => 'لا يوجد غيابات مسجلة لهذا الموظف'], 200);
 
-                // Check if there are any absences
-                if ($absences->isEmpty()) {
-                    return response()->json(['message' => 'لا يوجد أي غيابات موجودة في هذا العام لهذا الموظف'], 200);
-                }
-        
-                // Format the data
-                $groupedAbsences = $absences->groupBy('PersonID')->map(function ($absencesByPerson) {
-                    // Retrieve the first absence to extract the personal information
-                    $firstAbsence = $absencesByPerson->first();
-                    return [
-                        'PersonID' => $firstAbsence->PersonID,
-                        'FirstName' => $firstAbsence->personInformation->FirstName,
-                        'SecondName' => $firstAbsence->personInformation->SecondName,
-                        'ThirdName' => $firstAbsence->personInformation->ThirdName,
-                        'LandlineNumber' => $firstAbsence->personInformation->LandlineNumber,
-                        'absences' => $absencesByPerson->map(function ($absence) {
-                            return [
-                                'AbsenceID' => $absence->AbsenceID,
-                                'AbsenceDate' => $absence->AbsenceDate,
-                                'AbsenceReason' => $absence->AbsenceReason,
-                            ];
-                        })->toArray(), // Return as array
-                    ];
-                });
-                return response()->json(['data' => $groupedAbsences], 200);
-            }
-            
-            // Get all absences for the specified PersonID
-            $absences = PersonAbsence::with('personInformation')->where('PersonID', $personId)->orderBy('AbsenceDate', 'desc')->get();
-            // Check if there are any absences
-            if ($absences->isEmpty()) {
-                return response()->json(['message' => 'لا يوجد أي غيابات موجودة لهذا الموظف'], 200);
-            }
-    
-            // Format the data
-            $groupedAbsences = $absences->groupBy('PersonID')->map(function ($absencesByPerson) {
-                // Retrieve the first absence to extract the personal information
-                $firstAbsence = $absencesByPerson->first();
-                return [
-                    'PersonID' => $firstAbsence->PersonID,
-                    'FirstName' => $firstAbsence->personInformation->FirstName,
-                    'SecondName' => $firstAbsence->personInformation->SecondName,
-                    'ThirdName' => $firstAbsence->personInformation->ThirdName,
-                    'LandlineNumber' => $firstAbsence->personInformation->LandlineNumber,
-                    'absences' => $absencesByPerson->map(function ($absence) {
-                        return [
-                            'AbsenceID' => $absence->AbsenceID,
-                            'AbsenceDate' => $absence->AbsenceDate,
-                            'AbsenceReason' => $absence->AbsenceReason,
-                        ];
-                    })->toArray(), // Return as array
-                ];
-            });
-            return response()->json(['data' => $groupedAbsences], 200);
+            $query->with(['person' => function ($query){
+                $query->select('FirstName', 'SecondName', 'ThirdName', 'LandlineNumber', 'IsDeleted')->where('IsDeleted', 0);
+            }])->where('PersonID', $personId)->orderBy('AbsenceDate', 'desc');
         }
-
-        if ($absenceDate) {
-            // Get all absences for the specified AbsenceDate
-            $absences = PersonAbsence::with('personInformation')->where('AbsenceDate', $absenceDate)->get();
-            // Check if there are any absences
-            if ($absences->isEmpty()) {
-                return response()->json(['message' => 'لا يوجد أي غيابات موجودة في هذا التاريخ'], 200);
-            }
-    
-            $groupedAbsences = $absences->groupBy('PersonID')->map(function ($absencesByPerson) {
-                // Retrieve the first absence to extract the personal information
-                $firstAbsence = $absencesByPerson->first();
-                return [
-                    'PersonID' => $firstAbsence->PersonID,
-                    'FirstName' => $firstAbsence->personInformation->FirstName,
-                    'SecondName' => $firstAbsence->personInformation->SecondName,
-                    'ThirdName' => $firstAbsence->personInformation->ThirdName,
-                    'LandlineNumber' => $firstAbsence->personInformation->LandlineNumber,
-                    'absences' => $absencesByPerson->map(function ($absence) {
-                        return [
-                            'AbsenceID' => $absence->AbsenceID,
-                            'AbsenceDate' => $absence->AbsenceDate,
-                            'AbsenceReason' => $absence->AbsenceReason,
-                        ];
-                    })->toArray(), // Return as array
-                ];
-            });
-
-            return response()->json(['data' => $groupedAbsences], 200);
-        }
-
-        if ($month) {
-
+        
+        // Filter by month
+        if ($request->has('month')) {
             // Extract the year and month from the input
             [$year, $month] = explode('-', $month);
-
-            // Get all absences for the specified month
-            $absences = PersonAbsence::with('personInformation')
-                ->whereMonth('AbsenceDate', $month)
-                ->whereYear('AbsenceDate', $year)
-                ->orderBy('AbsenceDate', 'desc')
-                ->get();
-
+            $query->with(['person' => function ($query){
+                $query->where('IsDeleted', 0);
+            }])->whereMonth('AbsenceDate', $month)->whereYear('AbsenceDate', $year)->orderBy('AbsenceDate', 'desc');
             
-            // Check if there are any absences
-            if ($absences->isEmpty()) {
-                return response()->json(['message' => 'لا يوجد اي غيابات موجودة في هذا الشهر'], 200);
-            }
-    
-            $groupedAbsences = $absences->groupBy('PersonID')->map(function ($absencesByPerson) {
-                // Retrieve the first absence to extract the personal information
-                $firstAbsence = $absencesByPerson->first();
-                return [
-                    'PersonID' => $firstAbsence->PersonID,
-                    'FirstName' => $firstAbsence->personInformation->FirstName,
-                    'SecondName' => $firstAbsence->personInformation->SecondName,
-                    'ThirdName' => $firstAbsence->personInformation->ThirdName,
-                    'LandlineNumber' => $firstAbsence->personInformation->LandlineNumber,
-                    'absences' => $absencesByPerson->map(function ($absence) {
-                        return [
-                            'AbsenceID' => $absence->AbsenceID,
-                            'AbsenceDate' => $absence->AbsenceDate,
-                            'AbsenceReason' => $absence->AbsenceReason,
-                        ];
-                    })->toArray(), // Return as array
-                ];
-            });
-
-            return response()->json(['data' => $groupedAbsences], 200);
         }
 
-        if ($year) {
-            // Get all absences for the specified year
-            $absences = PersonAbsence::with('personInformation')->whereYear('AbsenceDate', $year)->get();
+        // Filter by year
+        if ($request->has('year')) {
+            $query->with(['person' => function ($query){
+                $query->where('IsDeleted', 0);
+            }])->whereYear('AbsenceDate', $request->year)->orderBy('AbsenceDate', 'desc');
+        }
 
-            // Check if there are any absences
-            if ($absences->isEmpty()) {
-                return response()->json(['message' => 'لا يوجد أي غيابات موجودة في هذا العام'], 200);
-            }
+
+        // Get the filtered results
+        $absences = $query->get();
+
     
-            $groupedAbsences = $absences->groupBy('PersonID')->map(function ($absencesByPerson) {
-                // Retrieve the first absence to extract the personal information
-                $firstAbsence = $absencesByPerson->first();
-                return [
-                    'PersonID' => $firstAbsence->PersonID,
-                    'FirstName' => $firstAbsence->personInformation->FirstName,
-                    'SecondName' => $firstAbsence->personInformation->SecondName,
-                    'ThirdName' => $firstAbsence->personInformation->ThirdName,
-                    'LandlineNumber' => $firstAbsence->personInformation->LandlineNumber,
-                    'absences' => $absencesByPerson->map(function ($absence) {
-                        return [
-                            'AbsenceID' => $absence->AbsenceID,
-                            'AbsenceDate' => $absence->AbsenceDate,
-                            'AbsenceReason' => $absence->AbsenceReason,
-                        ];
-                    })->toArray(), // Return as array
-                ];
-            });
+        if($absences->isEmpty())
+            return response()->json(['message'=>'لا يوجد أي غيابات مسجلة'], 200);
         
-            return response()->json(['data' => $groupedAbsences->values()], 200);
+        return $absences;
+        $response = array();
+        $i=0;
+        foreach($absences as $absence)
+        {
+            $person = $absence->person;
+            
+            $response[$i]['AbsenceID'] = $absence->AbsenceID;
+            $response[$i]['PersonID'] = $absence->PersonID;
+            $response[$i]['PersonFullName'] = $person->FirstName." ".$person->SecondName." ".$person->ThirdName;
+            $response[$i]['PersonCode'] = $person->LandlineNumber;
+            $response[$i]['AbsenceDate'] = $absence->AbsenceDate;
+            $response[$i]['AbsenceReason'] = $absence->AbsenceReason;
+
+            $i++;
         }
-        return response()->json(['message' => 'Please provide either AbsenceID, PersonID, AbsenceDate, month, or year'], 400);
+
+        return response()->json(['data'=>$response, 'message'=>'All Absences Returned Successfully!'], 200);
     }
 
     public function insertAbsence(Request $request)
@@ -450,7 +282,7 @@ class AbsenceController extends Controller
         // Group the attendances by PersonID to get each person's record for the given date
         foreach ($attendances->groupBy('PersonID') as $personId => $records) {
             // Get the person's information
-            $person = $records->first()->personInformation;
+            $person = $records->first()->person;
 
             // Get the attendance for the specified date (since we're grouping by PersonID, there should be only one record per person for this date)
             $attendance = $records->firstWhere('AbsenceDate', $date);
@@ -487,10 +319,10 @@ class AbsenceController extends Controller
             if (!isset($formattedData[$personId])) {
                 $formattedData[$personId] = [
                     'PersonID' => $personId,
-                    'FirstName' => $attendance->personInformation->FirstName,
-                    'SecondName' => $attendance->personInformation->SecondName,
-                    'ThirdName' => $attendance->personInformation->ThirdName,
-                    'LandlineNumber' => $attendance->personInformation->LandlineNumber,
+                    'FirstName' => $attendance->person->FirstName,
+                    'SecondName' => $attendance->person->SecondName,
+                    'ThirdName' => $attendance->person->ThirdName,
+                    'LandlineNumber' => $attendance->person->LandlineNumber,
                     'absence' => [], // Initialize the attendance array
                 ];
             }

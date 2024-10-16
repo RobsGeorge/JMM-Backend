@@ -28,7 +28,7 @@ class PersonAbsence extends Model
 
     public $timestamps = false;
 
-    public function personInformation()
+    public function person()
     {
         return $this->belongsTo(Person::class, 'PersonID', 'PersonID');
     }

@@ -36,7 +36,7 @@ class PersonSalaryController extends Controller
         // Get the filtered results
         $salaries = $query->get();
     
-        if(empty($salaries))
+        if($salaries->isEmpty())
             return response()->json(['message'=>'لا يوجد أي مرتبات مسجلة'], 200);
         return response()->json(['data'=>$salaries, 'message'=>'All Salaries Returned Successfully!'], 200);
     }

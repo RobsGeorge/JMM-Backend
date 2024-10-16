@@ -54,7 +54,7 @@ class PersonKhosoomatController extends Controller
         if ($request->has('month')) {
             // Extract the year and month from the input
             [$year, $month] = explode('-', $request->month);
-            $query->whereMonth('KhasmDate', $month)->orderBy('KhasmDate', 'desc');
+            $query->whereMonth('KhasmDate', $month)->whereYear('HafezDate', $year)->orderBy('KhasmDate', 'desc');
         }
 
         // Filter by year
@@ -66,7 +66,7 @@ class PersonKhosoomatController extends Controller
         // Get the filtered results
         $khosoomat = $query->get();
         //return $khosoomat;
-        if(empty($khosoomat))
+        if($khosoomat->isEmpty())
             return response()->json(['message'=>'لا يوجد أي خصومات مسجلة'], 200);
 
         $response = array();

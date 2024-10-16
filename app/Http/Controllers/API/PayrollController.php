@@ -123,21 +123,122 @@ class PayrollController extends Controller
 
             return response()->json(['data'=>$payroll, 'message' => 'Payroll Returned Successfully'], 200);
         }
-    }   
-
-    public function getPayroll()
-    {
-
     }
 
-    public function closePayroll()
-    {
 
-    }
-    
-    public function deletePayroll()
+
+
+    ///////////////////////////////////////////////////////////////////////
+    ///////////////////////////////////////////////////////////////////////
+
+    public function closeMonthPayroll(Request $request)
     {
-        
+        $validated = $request->validator(
+            [
+                'month' => 'required|date_format:Y-m',
+            ]
+        );
+    }
+
+    public function closePersonPayroll(Request $request)
+    {
+        $validated = $request->validator(
+            [
+                'month' => 'required|date_format:Y-m',
+                'person_id' => 'required|exists:PersonInformation,PersonID',
+            ]
+        );
+    }
+
+    public function getClosedMonthPayroll(Request $request)
+    {
+        $validated = $request->validator(
+            [
+                'month' => 'required|date_format:Y-m',
+            ]
+        );
+
+        [$year, $month] = explode('-', $validated['month']);
+
+        $payroll = Payroll::where('PayrollMonth', $month)->where('PayrollYear', $year)->get();
+        if(empty($payroll))
+        {
+            return response()->json(['message' => 'لا يوجد أي قبض مغلق لهذا الشهر'], 200);
+        }
+
+        return response()->json(['data'=>$payroll, 'message' => 'Payroll Returned Successfully'], 200); 
+    }
+
+    public function getMonthPayroll(Request $request)
+    {
+        $validated = $request->validator(
+            [
+                'month' => 'required|date_format:Y-m',
+            ]
+        );
+    }
+
+    public function getPersonDetailedPayroll(Request $request)
+    {
+        $numberOfDaysPerMonth = 30;
+
+        $validated = $request->validator(
+            [
+                'month' => 'required|date_format:Y-m',
+                'person_id' => 'required|exists:PersonInformation,PersonID',
+            ]
+        );
+
+        $personID = $validated['person_id'];
+        [$year, $month] = explode('-', $validated['month']);
+
+        $payroll = Payroll::where('PersonID', $personID)->where('PayrollMonth', $month)->where('PayrollYear', $year)->get();
+
+        if($payroll)
+        {
+            return response()->json(['data'=>$payroll, 'message' => 'Payroll Returned Successfully'], 200);
+        }
+
+        $salary = PersonSalary::where('PersonID', $personID)->select('Salary', 'VariableSalary')->orderBy('UpdateTimestamp', 'desc')->first();
+        $personAbsentDaysCount = PersonAbsence::where('PersonID', $personID)->whereMonth('AbsenceDate', $month)->whereYear('AbsenceDate', $year)->count();
+        $personalVacationsCount = PersonVacations::where('PersonID', $personID)->whereMonth('VacationDate', $month)->whereYear('VacationDate', $year)->count();
+        $personOfficialVacationsCount = PersonAttendance::where('PersonID', $personID)->select('IsCompanyOnVacation')->whereMonth('AttendanceDate', $month)->whereYear('AttendanceDate', $year)->where('IsCompanyOnVacation', 1)->count();
+        $personWeeklyVacationsCount = PersonAttendance::where('PersonID', $personID)->select('IsWeeklyVacation')->whereMonth('AttendanceDate', $month)->whereYear('AttendanceDate', $year)->where('IsWeeklyVacation', 1)->count();
+        $personAttendedDaysCount = $numberOfDaysPerMonth - ($personalVacationsCount + $personOfficialVacationsCount + $personWeeklyVacationsCount + $personAbsentDaysCount);
+        $personHawafezValue = PersonHafez::select('HafezValue')->where('PersonID', $personID)->whereMonth('HafezDate', $month)->whereYear('HafezDate', $year)->sum('HafezValue');
+        $personKhosoomatValue = PersonKhosoomat::select('KhasmValue')->where('PersonID', $personID)->whereMonth('KhasmDate', $month)->whereYear('KhasmDate', $year)->sum('KhasmValue');
+        $personSolafValue = PersonSolfa::select('SolfaValue')->where('PersonID', $personID)->whereMonth('SolfaDate', $month)->whereYear('SolfaDate', $year)->sum('SolfaValue');
+        //$personTaameenValue = PersonTaameenValue::select('TaameenValue')->where('PersonID', $personID)->orderBy('UpdateTimestamp', 'desc')->first();
+        $taameenConstants = Taameen::find(1);
+        $taameenFinalvalue = (float)$salary->Salary * $taameenConstants->TaameenPersonPercentage/100.0;
+    }
+
+    public function getPersonPayroll(Request $request)
+    {
+        $validated = $request->validator(
+            [
+                'month' => 'required|date_format:Y-m',
+                'person_id' => 'required|exists:PersonInformation,PersonID',
+            ]
+        );
+    }
+
+    public function deleteMonthPayroll(Request $request)
+    {
+        $validated = $request->validator(
+            [
+                'month' => 'required|date_format:Y-m',
+            ]
+        );
+    }
+    public function deletePersonPayroll(Request $request)
+    {
+        $validated = $request->validator(
+            [
+                'month' => 'required|date_format:Y-m',
+                'person_id' => 'required|exists:PersonInformation,PersonID',
+            ]
+        );
     }
 
 

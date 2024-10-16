@@ -63,7 +63,7 @@ class PersonYearlyVacationLimits extends Controller
         // Get the filtered results
         $limits = $query->get();
     
-        if(empty($limits))
+        if($limits->isEmpty())
             return response()->json(['message'=>'لا يوجد أي معلومات مسجلة'], 200);
         return response()->json(['data'=>$limits, 'message'=>'All Limits Returned Successfully!'], 200);
     }
@@ -126,7 +126,7 @@ class PersonYearlyVacationLimits extends Controller
         // Get the filtered results
         $limits = $query->get();
     
-        if(empty($limits))
+        if($limits->isEmpty())
             return response()->json(['message'=>'لا يوجد أي معلومات مسجلة'], 200);
         return response()->json(['data'=>$limits, 'message'=>'All Limits Returned Successfully!'], 200);
     }
