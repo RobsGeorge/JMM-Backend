@@ -35,10 +35,12 @@ class AbsenceController extends Controller
             $absence = $query->find($request->absence_id);
             
             if (!$absence) {
-                return response()->json(['message' => 'Absence not found'], 200);
+                return response()->json(['message' => 'لا يوجد غياب مسجل'], 200);
             }
             $response = array();
             $person = $absence->person;
+
+            if(!$person->IsDeleted){
 
             $response['AbsenceID'] = $absence->AbsenceID;
             $response['PersonID'] = $absence->PersonID;
@@ -48,6 +50,10 @@ class AbsenceController extends Controller
             $response['AbsenceReason'] = $absence->AbsenceReason;
 
             return response()->json(['data' => $response, 'message' => 'Absence Returned Successfully'], 200);
+
+            }
+
+            return response()->json(['message' => 'لا يوجد غياب مسجل'], 200);
         }
 
         
@@ -83,17 +89,23 @@ class AbsenceController extends Controller
         $i=0;
         foreach($absences as $absence)
         {
-            $person = $absence->person;
             
-            $response[$i]['AbsenceID'] = $absence->AbsenceID;
-            $response[$i]['PersonID'] = $absence->PersonID;
-            $response[$i]['PersonFullName'] = $person->FirstName." ".$person->SecondName." ".$person->ThirdName;
-            $response[$i]['PersonCode'] = $person->LandlineNumber;
-            $response[$i]['AbsenceDate'] = $absence->AbsenceDate;
-            $response[$i]['AbsenceReason'] = $absence->AbsenceReason;
+            $person = $absence->person;
+            if(!$person->IsDeleted)
+            {
+                $response[$i]['AbsenceID'] = $absence->AbsenceID;
+                $response[$i]['PersonID'] = $absence->PersonID;
+                $response[$i]['PersonFullName'] = $person->FirstName." ".$person->SecondName." ".$person->ThirdName;
+                $response[$i]['PersonCode'] = $person->LandlineNumber;
+                $response[$i]['AbsenceDate'] = $absence->AbsenceDate;
+                $response[$i]['AbsenceReason'] = $absence->AbsenceReason;
 
-            $i++;
+                $i++;
+            }
         }
+
+        if(empty($response))
+            return response()->json(['data'=>$response, 'message'=>'لا يوجد غيابات مسجلة'], 200);
         return response()->json(['data'=>$response, 'message'=>'All Absences Returned Successfully!'], 200);
     }
 
