@@ -29,7 +29,7 @@ class PersonKhosoomatController extends Controller
             $response = array();
             $person = $khasm->person;
 
-            $response['HafezID'] = $khasm->HafezID;
+            $response['HafezID'] = $khasm->KhasmID;
             $response['PersonID'] = $khasm->PersonID;
             $response['PersonFullName'] = $person->FirstName." ".$person->SecondName." ".$person->ThirdName;
             $response['PersonCode'] = $person->LandlineNumber;
@@ -54,7 +54,7 @@ class PersonKhosoomatController extends Controller
         if ($request->has('month')) {
             // Extract the year and month from the input
             [$year, $month] = explode('-', $request->month);
-            $query->whereMonth('KhasmDate', $month)->whereYear('HafezDate', $year)->orderBy('KhasmDate', 'desc');
+            $query->whereMonth('KhasmDate', $month)->whereYear('KhasmDate', $year)->orderBy('KhasmDate', 'desc');
         }
 
         // Filter by year
