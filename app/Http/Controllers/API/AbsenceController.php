@@ -74,7 +74,7 @@ class AbsenceController extends Controller
             // Extract the year and month from the input
             [$year, $month] = explode('-', $month);
             $query->with(['person' => function ($query){
-                $query->where('IsDeleted', 0);
+                $query->select('FirstName', 'SecondName', 'ThirdName', 'LandlineNumber', 'IsDeleted')->where('IsDeleted', 0);
             }])->whereMonth('AbsenceDate', $month)->whereYear('AbsenceDate', $year)->orderBy('AbsenceDate', 'desc');
             
         }
@@ -82,7 +82,7 @@ class AbsenceController extends Controller
         // Filter by year
         if ($request->has('year')) {
             $query->with(['person' => function ($query){
-                $query->where('IsDeleted', 0);
+                $query->select('FirstName', 'SecondName', 'ThirdName', 'LandlineNumber', 'IsDeleted')->where('IsDeleted', 0);
             }])->whereYear('AbsenceDate', $request->year)->orderBy('AbsenceDate', 'desc');
         }
 
