@@ -147,7 +147,7 @@ class AbsenceController extends Controller
                 'AbsenceReason' => $validated['absence_reason'] ?? null,
             ]);
 
-            $personSalary =  PersonSalary::where('PersonID', $validated['person_id'])->orderBy('AbsenceDate', 'desc')->first();
+            $personSalary =  PersonSalary::where('PersonID', $validated['person_id'])->orderBy('UpdateTimestamp', 'desc')->first();
             $absenceMinusValue = (float)$personSalary->Salary/30; //Get the Person latest saved salary, divide it by 30 to get the value of the minus for the absence
 
             $khasm = PersonKhosoomat::create([
