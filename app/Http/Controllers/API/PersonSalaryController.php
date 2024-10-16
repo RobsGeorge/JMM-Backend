@@ -10,7 +10,7 @@ class PersonSalaryController extends Controller
     public function get(Request $request)
     {
         $validated = $request->validate([
-            'salary_id' => 'sometimes|exists:PersonHawafez,HafezID',
+            'salary_id' => 'sometimes|exists:PersonSalary,HafezID',
             'person_id' => 'sometimes|exists:PersonInformation,PersonID'
         ]);
 
