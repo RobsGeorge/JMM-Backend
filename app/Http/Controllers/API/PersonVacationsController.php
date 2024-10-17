@@ -163,6 +163,7 @@ class PersonVacationsController extends Controller
                 if($attendance)
                 {
                     $attendance->IsPersonalVacation = 1;
+                    $attendance->PersonalVacationID = $vacation->PersonVacationID;
                     $attendance->save();
                 }
                 return response()->json([
@@ -242,6 +243,7 @@ class PersonVacationsController extends Controller
             if($attendance)
             {
                 $attendance->IsPersonalVacation = 0;
+                $attendance->PersonalVacationID = null;
                 $attendance->save();
             }
             
@@ -252,6 +254,7 @@ class PersonVacationsController extends Controller
             if($attendance)
             {
                 $attendance->IsPersonalVacation = 1;
+                $attendance->PersonalVacationID = $vacation->PersonVacationID;
                 $attendance->save();
             }
         }
@@ -298,6 +301,7 @@ class PersonVacationsController extends Controller
             if($attendance)
             {
                 $attendance->IsPersonalVacation = 0;
+                $attendance->PersonalVacationID = null;
                 $attendance->save();
             }
             return response()->json(['message' => 'تم إلغاء الأجازة بنجاح'], 200);
