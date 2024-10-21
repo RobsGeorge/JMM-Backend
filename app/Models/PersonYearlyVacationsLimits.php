@@ -18,6 +18,7 @@ class PersonYearlyVacationsLimits extends Model
      * @var array<int, string>
      */
     protected $fillable = [
+        'LimitID',
         'PersonID',
         'Year',
         'VacationTypeID',
@@ -25,14 +26,14 @@ class PersonYearlyVacationsLimits extends Model
     ];
 
     protected $table = "PersonYearlyVacationLimits";
-    protected $primaryKey = 'ID';
+    protected $primaryKey = 'LimitID';
 
     public $timestamps = false;
 
 
     public function person()
     {
-        return $this->belongsTo(Person::class, 'PersonID');
+        return $this->belongsTo(Person::class, 'PersonID', 'PersonID');
     }
 
     public function vacationType()

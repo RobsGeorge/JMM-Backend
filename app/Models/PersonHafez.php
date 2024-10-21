@@ -20,7 +20,8 @@ class PersonHafez extends Model
         'PersonID',
         'HafezValue',
         'HafezDate',
-        'HafezReason'
+        'HafezReason',
+        'HafezOnMainSalary'
     ];
 
     protected $table = "PersonHawafez";

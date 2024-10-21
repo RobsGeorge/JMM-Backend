@@ -5,6 +5,7 @@ namespace App\Http\Controllers\API;
 
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use App\Models\Person;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
 use App\Models\PersonAttendance;
@@ -194,7 +195,7 @@ class AbsenceController extends Controller
         }
     }
 
-    public function updateAbsence(Request $request, $absenceId)
+    public function updateAbsence(Request $request, $absenceId=null)
     {
         // Validate the request (AbsenceReason is optional)
         $validatedData = $request->validate([
@@ -204,7 +205,7 @@ class AbsenceController extends Controller
         // Find the absence record by AbsenceID
         $absence = PersonAbsence::find($absenceId);
         
-        // Check if absence exists
+        // Check if absence existsp
         if (!$absence) {
             return response()->json(['message' => 'Absence not found'], 200);
         }
@@ -219,19 +220,41 @@ class AbsenceController extends Controller
         return response()->json(['message' => 'تم التعديل بنجاح', 'data' => $absence], 200);
     }
 
-    public function deleteAbsence($absenceId)
+    public function deleteAbsence(Request $request, $absenceId)
     {
-        // Find the absence record by AbsenceID
-        $absence = PersonAbsence::find($absenceId);
 
-        // Check if absence exists
-        if (!$absence) {
-            return response()->json(['message' => 'Absence not found'], 200);
+        $validated = $request->validate([
+            'person_id' => 'required|exists:PersonInformation,PersonID',
+            'absence_date' => 'required|date_format:Y-m-d',
+        ]);
+
+        
+
+        if($validated)
+        {
+            $personId = $validated['person_id'];
+            $absenceDate = $validated['absence_date'];
+
+            $absence = PersonAbsence::where('PersonID', $personId)->where('AbsenceDate', $absenceDate);
+
+            // Check if absence exists
+            if (!$absence) {
+                return response()->json(['message' => 'Absence not found'], 200);
+            }
         }
+        else
+        {
+            // Find the absence record by AbsenceID
+            $absence = PersonAbsence::find($absenceId);
 
-        // Get PersonID and AbsenceDate for related updates
-        $personId = $absence->PersonID;
-        $absenceDate = $absence->AbsenceDate;
+            // Check if absence exists
+            if (!$absence) {
+                return response()->json(['message' => 'Absence not found'], 200);
+            }
+            // Get PersonID and AbsenceDate for related updates
+            $personId = $absence->PersonID;
+            $absenceDate = $absence->AbsenceDate;
+        }
 
         // Begin a transaction to ensure consistency across tables
         DB::transaction(function () use ($personId, $absenceDate, $absence) {

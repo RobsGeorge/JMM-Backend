@@ -5,6 +5,7 @@ namespace App\Http\Controllers\API;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Models\PersonHafez;
+use App\Models\PersonSalary;
 
 class PersonHafezController extends Controller
 {
@@ -17,6 +18,8 @@ class PersonHafezController extends Controller
             'year' => 'sometimes|integer|min:1900',
         ]);
 
+        return $request;
+
         // Start building the query
         $query = PersonHafez::query();
 
@@ -26,6 +29,8 @@ class PersonHafezController extends Controller
                 return response()->json(['message' => 'Hafez not found'], 200);
             }
 
+            $salary = PersonSalary::where('PersonID', $hafez->PersonID)->select('Salary', 'VariableSalary')->orderBy('UpdateTimestamp', 'desc')->first();
+            
             $response = array();
             $person = $hafez->person;
 
@@ -36,6 +41,11 @@ class PersonHafezController extends Controller
             $response['HafezDate'] = $hafez->HafezDate;
             $response['HafezReason'] = $hafez->HafezReason;
             $response['HafezValue'] = $hafez->HafezValue;
+            $response['HafezFromMainSalary'] = $hafez->HafezFromMainSalary;
+            $response['ValueOfPersonHourFromMainSalary'] = (float)$salary->Salary/(30*8);
+            $response['ValueOfPersonDayFromMainSalary'] = (float)$salary->Salary/(30);
+            $response['ValueOfPersonHourFromVariableSalary'] = (float)$salary->VariableSalary/(30*8);
+            $response['ValueOfPersonDayFromVariableSalary'] = (float)$salary->VariableSalary/(30);
 
             return response()->json(['data' => $response, 'message' => 'Hafez Returned Successfully'], 200);
         }
@@ -74,7 +84,7 @@ class PersonHafezController extends Controller
         foreach($hawafez as $hafez)
         {
             $person = $hafez->person;
-            
+            $salary = PersonSalary::where('PersonID', $hafez->PersonID)->select('Salary', 'VariableSalary')->orderBy('UpdateTimestamp', 'desc')->first();
             $response[$i]['HafezID'] = $hafez->HafezID;
             $response[$i]['PersonID'] = $hafez->PersonID;
             $response[$i]['PersonFullName'] = $person->FirstName." ".$person->SecondName." ".$person->ThirdName;
@@ -82,6 +92,10 @@ class PersonHafezController extends Controller
             $response[$i]['HafezDate'] = $hafez->HafezDate;
             $response[$i]['HafezReason'] = $hafez->HafezReason;
             $response[$i]['HafezValue'] = $hafez->HafezValue;
+            $response[$i]['ValueOfPersonHourFromMainSalary'] = (float)$salary->Salary/(30*8);
+            $response[$i]['ValueOfPersonDayFromMainSalary'] = (float)$salary->Salary/(30);
+            $response[$i]['ValueOfPersonHourFromVariableSalary'] = (float)$salary->VariableSalary/(30*8);
+            $response[$i]['ValueOfPersonDayFromVariableSalary'] = (float)$salary->VariableSalary/(30);
 
             $i++;
         }
@@ -95,20 +109,23 @@ class PersonHafezController extends Controller
             'person_id' => 'required|integer|exists:PersonInformation,PersonID',
             'hafez_date' => 'required|date_format:Y-m-d',
             'hafez_value' => 'required',
-            'hafez_reason' => 'required'
+            'hafez_reason' => 'required',
+            'hafez_from_main_salary' => 'required|integer'
         ]);
 
         $hafezDate = $validated['hafez_date'];
         $personId = $validated['person_id'];
         $hafezValue = $validated['hafez_value'];
         $hafezReason = $validated['hafez_reason'];
+        $isFromMainSalary = $validated['hafez_from_main_salary'];
         
         try{
             $hafez = PersonHafez::create([
                 'PersonID' => $personId,
                 'HafezDate' => $hafezDate,
                 'HafezValue' => $hafezValue,
-                'HafezReason' => $hafezReason
+                'HafezReason' => $hafezReason,
+                'HafezFromMainSalary' => $isFromMainSalary,
             ]);
             
 
@@ -136,16 +153,17 @@ class PersonHafezController extends Controller
 
     public function update(Request $request, $id)
     {
-        
         $validated = $request->validate([
             'hafez_date' => 'required|date_format:Y-m-d',
             'hafez_reason' => 'required',
-            'hafez_value' => 'required'
+            'hafez_value' => 'required',
+            'hafez_from_main_salary' => 'required|integer',
         ]);
         
         $hafezDate = $validated['hafez_date'];
         $hafezReason = $validated['hafez_reason'];
         $hafezValue = $validated['hafez_value'];
+        $isFromMainSalary = $validated['hafez_from_main_salary'];
 
         $hafez = PersonHafez::find($id);
         
@@ -169,6 +187,12 @@ class PersonHafezController extends Controller
 
         if (isset($hafezValue) && $hafez->HafezValue !== $hafezValue) {
             $hafez->HafezValue = $hafezValue;
+            $changes = true;
+        }
+
+        if (isset($isFromMainSalary) && $hafez->HafezFromMainSalary !== $isFromMainSalary)
+        {
+            $hafez->HafezFromMainSalary = $isFromMainSalary;
             $changes = true;
         }
 

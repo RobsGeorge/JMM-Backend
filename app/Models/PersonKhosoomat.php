@@ -20,7 +20,8 @@ class PersonKhosoomat extends Model
         'PersonID',
         'KhasmValue',
         'KhasmDate',
-        'KhasmReason'
+        'KhasmReason',
+        'KhasmFromMainSalary'
     ];
 
     protected $table = "PersonKhosoomat";

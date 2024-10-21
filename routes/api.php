@@ -21,6 +21,7 @@ use App\Http\Controllers\API\PersonSalaryController;
 use App\Http\Controllers\API\PersonSolfaController;
 use App\Http\Controllers\API\PersonTaameenValueController;
 use App\Http\Controllers\API\PayrollController;
+use App\Http\Controllers\API\PersonYearlyVacationLimitsController;
 
 /*
 |--------------------------------------------------------------------------
@@ -105,10 +106,10 @@ Route::post('/person-vacations', [PersonVacationsController::class, 'insert']);
 Route::put('/person-vacations/{id}', [PersonVacationsController::class, 'update']);
 Route::delete('/person-vacations/{id}', [PersonVacationsController::class, 'delete']);
 
-Route::get('/person-vacations-limits', [PersonVacationsController::class, 'get']);
-Route::post('/person-vacations-limits', [PersonVacationsController::class, 'insert']);
-Route::put('/person-vacations-limits/{id}', [PersonVacationsController::class, 'update']);
-Route::delete('/person-vacations-limits/{id}', [PersonVacationsController::class, 'delete']);
+Route::get('/person-vacations-limits', [PersonYearlyVacationLimitsController::class, 'get']);
+Route::post('/person-vacations-limits', [PersonYearlyVacationLimitsController::class, 'insert']);
+Route::put('/person-vacations-limits/{id}', [PersonYearlyVacationLimitsController::class, 'update']);
+Route::delete('/person-vacations-limits/{id}', [PersonYearlyVacationLimitsController::class, 'delete']);
 
 Route::get('/hafez', [PersonHafezController::class, 'get']);
 Route::post('/hafez', [PersonHafezController::class, 'insert']);

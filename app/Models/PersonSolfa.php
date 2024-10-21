@@ -21,7 +21,8 @@ class PersonSolfa extends Model
         'PersonID',
         'SolfaValue',
         'SolfaDate',
-        'SolfaReason'
+        'SolfaReason',
+        'SolfaFromMainSalary'
     ];
 
     protected $table = "PersonSolaf";

@@ -7,12 +7,12 @@ use App\Http\Controllers\Controller;
 use App\Models\PersonVacations;
 use App\Models\PersonYearlyVacationsLimits;
 
-class PersonYearlyVacationLimits extends Controller
+class PersonYearlyVacationLimitsController extends Controller
 {
     public function get(Request $request)
     {
         $request->validate([
-            'limit_id' => 'sometimes|exists:PersonYearlyVacationsLimits,ID',
+            'limit_id' => 'sometimes|exists:PersonYearlyVacationLimits,LimitID',
             'person_id' => 'sometimes|exists:PersonInformation,PersonID',
             'vacation_type_id' => 'sometimes|Integer|exists:VacationTypesTable,VacationTypeID',
             'year' => 'sometimes|integer|min:1900',
@@ -53,16 +53,9 @@ class PersonYearlyVacationLimits extends Controller
         }
 
 
-        // Check if no query parameters are present
-        if (!$request->hasAny(['limit_id', 'person_id', 'vacation_type_id', 'year'])) {
-            // If no query parameters, return all records
-            $imits = $query->get();
-            return response()->json(['data'=>$imits, 'message'=>'All Limits Returned Successfully!'], 200);
-        }
-
         // Get the filtered results
         $limits = $query->get();
-    
+        
         if($limits->isEmpty())
             return response()->json(['message'=>'لا يوجد أي معلومات مسجلة'], 200);
         return response()->json(['data'=>$limits, 'message'=>'All Limits Returned Successfully!'], 200);
@@ -144,12 +137,12 @@ class PersonYearlyVacationLimits extends Controller
         $vacationTypeID = $validated['vacation_type_id'];
         $year = $validated['year'];
         $vacationLimit = $validated['vacation_limit_per_year'];
-        
+
         try{
             $limit = PersonYearlyVacationsLimits::create([
                 'PersonID' => $personId,
                 'Year' => $year,
-                'vacationTypeID' => $vacationTypeID,
+                'VacationTypeID' => $vacationTypeID,
                 'VacationLimit' => $vacationLimit
             ]);
             
@@ -194,7 +187,7 @@ class PersonYearlyVacationLimits extends Controller
         $changes = false;
 
         if (isset($vacationLimit) && $limit->VacationLimit !== $vacationLimit) {
-            $limit->KhasmValue = $vacationLimit;
+            $limit->VacationLimit = $vacationLimit;
             $changes = true;
         }
 

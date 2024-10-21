@@ -12,6 +12,7 @@ use App\Models\WeekDays;
 use App\Models\YearlyOfficialVacations;
 use App\Models\Person;
 use App\Models\WorkingTimes;
+use App\Http\Controllers\API\AbsenceController;
 
 
 
@@ -407,6 +408,7 @@ class AttendanceController extends Controller
 
     public function updateAttendance(Request $request)
     {
+
         // Validate the incoming request data
         $validatedData = $request->validate([
             'person_id' => 'required|integer|exists:PersonInformation,PersonID',
@@ -416,11 +418,12 @@ class AttendanceController extends Controller
             'IsAbsent' => 'nullable|integer',
         ]);
 
+        
         // Fetch the attendance record based on person_id and date
         $attendance = PersonAttendance::where('PersonID', $validatedData['person_id'])
                                     ->where('AttendanceDate', $validatedData['date'])
                                     ->first();
-        
+                                    //return $attendance->WorkStartTime !== $validatedData['WorkStartTime'];
         // Check if the attendance record exists
         if (!$attendance) {
             return response()->json(['message' => 'لا يوجد كشف مفتوح لهذا الشخص في هذا التاريخ'], 200);
@@ -431,6 +434,7 @@ class AttendanceController extends Controller
 
         // Update the fields if they are provided and different from the existing values
         if (isset($validatedData['WorkStartTime']) && $attendance->WorkStartTime !== $validatedData['WorkStartTime']) {
+            return 'H';
             $attendance->WorkStartTime = $validatedData['WorkStartTime'];
             $changes['WorkStartTime'] = $validatedData['WorkStartTime'];
         }
@@ -442,6 +446,38 @@ class AttendanceController extends Controller
 
         if (isset($validatedData['IsAbsent']) && $attendance->IsAbsent !== $validatedData['IsAbsent']) {
             $attendance->IsAbsent = $validatedData['IsAbsent'];
+            if($attendance->IsAbsent)
+            {
+                $data = [
+                    'person_id' => $validatedData['person_id'],
+                    'absence_date' => $attendance->AttendanceDate,
+                    'absence_reason' => 'غياب يوم:'.$attendance->AttendanceDate
+                ];
+        
+                // Call the insert method of CalledController with a POST request
+                $response = app()->call('App\Http\Controllers\AbsenceController@insertAbsence', [
+                    'request' => Request::create('/absence', 'POST', $data)
+                ]);
+        
+                // Return the response
+                return $response;
+            }
+            else
+            {
+                $data = [
+                    'person_id' => $validatedData['person_id'],
+                    'absence_date' => $attendance->AttendanceDate,
+                    'absence_reason' => 'غياب يوم:'.$attendance->AttendanceDate
+                ];
+        
+                // Call the insert method of CalledController with a POST request
+                $response = app()->call('App\Http\Controllers\AbsenceController@deleteAbsence', [
+                    'request' => Request::create('/absence', 'DELETE', $data)
+                ]);
+        
+                // Return the response
+                return $response;
+            }
             $changes['IsAbsent'] = $validatedData['IsAbsent'];
         }
 
