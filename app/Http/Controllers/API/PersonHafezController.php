@@ -7,6 +7,7 @@ use App\Http\Controllers\Controller;
 use App\Models\PersonHafez;
 use App\Models\PersonSalary;
 
+
 class PersonHafezController extends Controller
 {
     public function get(Request $request)
@@ -17,8 +18,6 @@ class PersonHafezController extends Controller
             'month' => 'sometimes|date_format:Y-m',
             'year' => 'sometimes|integer|min:1900',
         ]);
-
-        return $request;
 
         // Start building the query
         $query = PersonHafez::query();

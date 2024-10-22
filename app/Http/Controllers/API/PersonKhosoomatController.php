@@ -5,6 +5,7 @@ namespace App\Http\Controllers\API;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Models\PersonKhosoomat;
+use App\Models\PersonSalary;
 
 class PersonKhosoomatController extends Controller
 {
@@ -26,6 +27,9 @@ class PersonKhosoomatController extends Controller
             if (!$khasm) {
                 return response()->json(['message' => 'Khasm not found'], 200);
             }
+
+            $salary = PersonSalary::where('PersonID', $khasm->PersonID)->select('Salary', 'VariableSalary')->orderBy('UpdateTimestamp', 'desc')->first();
+
             $response = array();
             $person = $khasm->person;
 
@@ -36,6 +40,11 @@ class PersonKhosoomatController extends Controller
             $response['KhasmDate'] = $khasm->KhasmDate;
             $response['KhasmReason'] = $khasm->KhasmReason;
             $response['KhasmValue'] = $khasm->KhasmValue;
+            $response['KhasmFromMainSalary'] = $khasm->KhasmFromMainSalary;
+            $response['ValueOfPersonHourFromMainSalary'] = (float)$salary->Salary/(30*8);
+            $response['ValueOfPersonDayFromMainSalary'] = (float)$salary->Salary/(30);
+            $response['ValueOfPersonHourFromVariableSalary'] = (float)$salary->VariableSalary/(30*8);
+            $response['ValueOfPersonDayFromVariableSalary'] = (float)$salary->VariableSalary/(30);
 
             return response()->json(['data' => $response, 'message' => 'Khasm Returned Successfully'], 200);
         }
@@ -65,7 +74,7 @@ class PersonKhosoomatController extends Controller
 
         // Get the filtered results
         $khosoomat = $query->get();
-        //return $khosoomat;
+
         if($khosoomat->isEmpty())
             return response()->json(['message'=>'لا يوجد أي خصومات مسجلة'], 200);
 
@@ -74,7 +83,7 @@ class PersonKhosoomatController extends Controller
         foreach($khosoomat as $khasm)
         {
             $person = $khasm->person;
-            
+            $salary = PersonSalary::where('PersonID', $khasm->PersonID)->select('Salary', 'VariableSalary')->orderBy('UpdateTimestamp', 'desc')->first();
             $response[$i]['KhasmID'] = $khasm->KhasmID;
             $response[$i]['PersonID'] = $khasm->PersonID;
             $response[$i]['PersonFullName'] = $person->FirstName." ".$person->SecondName." ".$person->ThirdName;
@@ -82,6 +91,11 @@ class PersonKhosoomatController extends Controller
             $response[$i]['KhasmDate'] = $khasm->KhasmDate;
             $response[$i]['KhasmReason'] = $khasm->KhasmReason;
             $response[$i]['KhasmValue'] = $khasm->KhasmValue;
+            $response[$i]['KhasmFromMainSalary'] = $khasm->KhasmFromMainSalary;
+            $response[$i]['ValueOfPersonHourFromMainSalary'] = (float)$salary->Salary/(30*8);
+            $response[$i]['ValueOfPersonDayFromMainSalary'] = (float)$salary->Salary/(30);
+            $response[$i]['ValueOfPersonHourFromVariableSalary'] = (float)$salary->VariableSalary/(30*8);
+            $response[$i]['ValueOfPersonDayFromVariableSalary'] = (float)$salary->VariableSalary/(30);
 
             $i++;
         }
@@ -94,20 +108,23 @@ class PersonKhosoomatController extends Controller
             'person_id' => 'required|integer|exists:PersonInformation,PersonID',
             'khasm_date' => 'required|date_format:Y-m-d',
             'khasm_value' => 'required',
-            'khasm_reason' => 'required'
+            'khasm_reason' => 'required',
+            'khasm_from_main_salary' => 'required|integer'
         ]);
 
         $khasmDate = $validated['khasm_date'];
         $personId = $validated['person_id'];
         $khasmValue = $validated['khasm_value'];
         $khasmReason = $validated['khasm_reason'];
+        $isFromMainSalary = $validated['khasm_from_main_salary'];
         
         try{
             $khasm = PersonKhosoomat::create([
                 'PersonID' => $personId,
                 'KhasmDate' => $khasmDate,
                 'KhasmValue' => $khasmValue,
-                'KhasmReason' => $khasmReason
+                'KhasmReason' => $khasmReason,
+                'KhasmFromMainSalary' => $isFromMainSalary
             ]);
             
 
@@ -139,7 +156,8 @@ class PersonKhosoomatController extends Controller
         $validated = $request->validate([
             'khasm_date' => 'required|date_format:Y-m-d',
             'khasm_reason' => 'required',
-            'khasm_value' => 'required'
+            'khasm_value' => 'required',
+            'khasm_from_main_salary' => 'required|integer'
         ]);
         
         $khasmDate = $validated['khasm_date'];
@@ -168,6 +186,12 @@ class PersonKhosoomatController extends Controller
 
         if (isset($khasmValue) && $khasm->KhasmValue !== $khasmValue) {
             $khasm->KhasmValue = $khasmValue;
+            $changes = true;
+        }
+
+        if (isset($isFromMainSalary) && $khasm->KhasmFromMainSalary !== $isFromMainSalary)
+        {
+            $khasm->KhasmFromMainSalary = $isFromMainSalary;
             $changes = true;
         }
 

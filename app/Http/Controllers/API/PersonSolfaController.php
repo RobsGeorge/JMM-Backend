@@ -36,7 +36,10 @@ class PersonSolfaController extends Controller
             $response['SolfaDate'] = $solfa->SolfaDate;
             $response['SolfaReason'] = $solfa->SolfaReason;
             $response['SolfaValue'] = $solfa->SolfaValue;
+            $response['SolfaFromMainSalary'] = $solfa->SolfaFromMainSalary;
+
             return response()->json(['data' => $response, 'message' => 'Solfa Returned Successfully'], 200);
+            
         }
 
         // Filter by person_id
@@ -78,6 +81,7 @@ class PersonSolfaController extends Controller
             $response[$i]['SolfaDate'] = $solfa->SolfaDate;
             $response[$i]['SolfaReason'] = $solfa->SolfaReason;
             $response[$i]['SolfaValue'] = $solfa->SolfaValue;
+            $response[$i]['SolfaFromMainSalary'] = $solfa->SolfaFromMainSalary;
 
             $i++;
         }
@@ -90,20 +94,23 @@ class PersonSolfaController extends Controller
             'person_id' => 'required|integer|exists:PersonInformation,PersonID',
             'solfa_date' => 'required|date_format:Y-m-d',
             'solfa_value' => 'required',
-            'solfa_reason' => 'required'
+            'solfa_reason' => 'required',
+            'solfa_from_main_salary' => 'required|integer'
         ]);
 
         $solfaDate = $validated['solfa_date'];
         $personId = $validated['person_id'];
         $solfaValue = $validated['solfa_value'];
         $solfaReason = $validated['solfa_reason'];
+        $isFromMainSalary = $validated['solfa_from_main_salary'];
         
         try{
             $solfa = PersonSolfa::create([
                 'PersonID' => $personId,
                 'SolfaDate' => $solfaDate,
                 'SolfaValue' => $solfaValue,
-                'SolfaReason' => $solfaReason
+                'SolfaReason' => $solfaReason,
+                'SolfaFromMainSalary' => $isFromMainSalary,
             ]);
             
 
@@ -135,12 +142,14 @@ class PersonSolfaController extends Controller
         $validated = $request->validate([
             'solfa_date' => 'required|date_format:Y-m-d',
             'solfa_reason' => 'required',
-            'solfa_value' => 'required'
+            'solfa_value' => 'required',
+            'solfa_from_main_salary' => 'required|integer'
         ]);
         
         $solfaDate = $validated['solfa_date'];
         $solfaReason = $validated['solfa_reason'];
         $solfaValue = $validated['solfa_value'];
+        $isFromMainSalary = $validated['solfa_from_main_salary'];
 
         $solfa = PersonSolfa::find($id);
         
@@ -164,6 +173,12 @@ class PersonSolfaController extends Controller
 
         if (isset($solfaValue) && $solfa->SolfaValue !== $solfaValue) {
             $solfa->SolfaValue = $solfaValue;
+            $changes = true;
+        }
+
+        if (isset($isFromMainSalary) && $solfa->SolfaFromMainSalary !== $isFromMainSalary)
+        {
+            $solfa->SolfaFromMainSalary = $isFromMainSalary;
             $changes = true;
         }
 
