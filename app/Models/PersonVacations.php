@@ -21,7 +21,8 @@ class PersonVacations extends Model
         'PersonVacationID',
         'PersonID',
         'VacationDate',
-        'VacationTypeID'
+        'VacationTypeID',
+        'IsBeyondLimit'
     ];
 
     protected $table = "PersonVacations";

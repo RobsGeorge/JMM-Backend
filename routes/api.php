@@ -22,6 +22,7 @@ use App\Http\Controllers\API\PersonSolfaController;
 use App\Http\Controllers\API\PersonTaameenValueController;
 use App\Http\Controllers\API\PayrollController;
 use App\Http\Controllers\API\PersonYearlyVacationLimitsController;
+use App\Models\PersonYearlyVacationsLimits;
 
 /*
 |--------------------------------------------------------------------------
@@ -107,6 +108,7 @@ Route::put('/person-vacations/{id}', [PersonVacationsController::class, 'update'
 Route::delete('/person-vacations/{id}', [PersonVacationsController::class, 'delete']);
 
 Route::get('/person-vacations-limits', [PersonYearlyVacationLimitsController::class, 'get']);
+Route::get('/person-vacations-remaining-limits', [PersonYearlyVacationLimitsController::class, 'getRemaining']);
 Route::post('/person-vacations-limits', [PersonYearlyVacationLimitsController::class, 'insert']);
 Route::put('/person-vacations-limits/{id}', [PersonYearlyVacationLimitsController::class, 'update']);
 Route::delete('/person-vacations-limits/{id}', [PersonYearlyVacationLimitsController::class, 'delete']);
