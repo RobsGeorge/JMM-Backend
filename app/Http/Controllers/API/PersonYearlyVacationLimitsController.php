@@ -49,7 +49,7 @@ class PersonYearlyVacationLimitsController extends Controller
 
         // Filter by year
         if ($request->has('year')) {
-            $query->whereYear('Year', $request->year)->orderBy('Year', 'desc');
+            $query->where('Year', $request->year)->orderBy('Year', 'desc');
         }
 
 
@@ -68,9 +68,10 @@ class PersonYearlyVacationLimitsController extends Controller
             'vacation_type_id' => 'required|Integer|exists:VacationTypesTable,VacationTypeID',
             'year' => 'required|integer|min:1900',
         ]);
-
         
         $vacationLimit = PersonYearlyVacationsLimits::select('VacationLimit')->where('PersonID', $validated['person_id'])->where('VacationTypeID', $validated['vacation_type_id'])->where('Year', $validated['year'])->get()->first()->VacationLimit;
+
+        
 
         if (!$vacationLimit) {
             return response()->json(['message' => 'Limit not found'], 200);
@@ -79,7 +80,7 @@ class PersonYearlyVacationLimitsController extends Controller
         $vacationsCountFromLimit = PersonVacations::where('PersonID', $validated['person_id'])->where('VacationTypeID', $validated['vacation_type_id'])->whereYear('VacationDate', $validated['year'])->where('IsBeyondLimit', 0)->count();
         
         $vacationsCountBeyondLimit = PersonVacations::where('PersonID', $validated['person_id'])->where('VacationTypeID', $validated['vacation_type_id'])->whereYear('VacationDate', $validated['year'])->where('IsBeyondLimit', 1)->count();
-
+        
         if($vacationsCountFromLimit >= $vacationLimit)
         {
             $remaining = 0;
