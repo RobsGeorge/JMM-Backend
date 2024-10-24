@@ -171,18 +171,23 @@ class PayrollController extends Controller
 
     public function getMonthPayroll(Request $request)
     {
-        $validated = $request->validator(
+        $validated = $request->validate(
             [
                 'month' => 'required|date_format:Y-m',
             ]
         );
+
+        $numberOfDaysPerMonth = 30;
+        [$year, $month] = explode('-', $validated['month']);
+
+        
     }
 
     public function getPersonDetailedPayroll(Request $request)
     {
         $numberOfDaysPerMonth = 30;
 
-        $validated = $request->validator(
+        $validated = $request->validate(
             [
                 'month' => 'required|date_format:Y-m',
                 'person_id' => 'required|exists:PersonInformation,PersonID',
@@ -192,7 +197,7 @@ class PayrollController extends Controller
         $personID = $validated['person_id'];
         [$year, $month] = explode('-', $validated['month']);
 
-        $payroll = Payroll::where('PersonID', $personID)->where('PayrollMonth', $month)->where('PayrollYear', $year)->get();
+        $payroll = Payroll::where('PersonID', $personID)->where('PayrollMonth', $month)->where('PayrollYear', $year)->exists();
 
         if($payroll)
         {
@@ -200,17 +205,53 @@ class PayrollController extends Controller
         }
 
         $salary = PersonSalary::where('PersonID', $personID)->select('Salary', 'VariableSalary')->orderBy('UpdateTimestamp', 'desc')->first();
+        
+        $personHafezFromMainSalary = PersonHafez::select('HafezValue')->where('PersonID', $personID)->whereMonth('HafezDate', $month)->whereYear('HafezDate', $year)->where('HafezOnMainSalary', 1)->sum('HafezValue');
+        $personHafezFromVariableSalary = PersonHafez::select('HafezValue')->where('PersonID', $personID)->whereMonth('HafezDate', $month)->whereYear('HafezDate', $year)->where('HafezOnMainSalary', 0)->sum('HafezValue');
+        
+        $personKhasmFromMainSalary = PersonKhosoomat::select('KhasmValue')->where('PersonID', $personID)->whereMonth('KhasmDate', $month)->whereYear('KhasmDate', $year)->where('KhasmFromMainSalary', 1)->sum('KhasmValue');
+        $personKhasmFromVariableSalary = PersonKhosoomat::select('KhasmValue')->where('PersonID', $personID)->whereMonth('KhasmDate', $month)->whereYear('KhasmDate', $year)->where('KhasmFromMainSalary', 0)->sum('KhasmValue');
+        
+        $personSolfaFromMainSalary = PersonSolfa::select('SolfaValue')->where('PersonID', $personID)->whereMonth('SolfaDate', $month)->whereYear('SolfaDate', $year)->where('SolfaFromMainsalary', 1)->sum('SolfaValue');
+        $personSolfaFromVariableSalary = PersonSolfa::select('SolfaValue')->where('PersonID', $personID)->whereMonth('SolfaDate', $month)->whereYear('SolfaDate', $year)->where('SolfaFromMainsalary', 0)->sum('SolfaValue');
+        
         $personAbsentDaysCount = PersonAbsence::where('PersonID', $personID)->whereMonth('AbsenceDate', $month)->whereYear('AbsenceDate', $year)->count();
-        $personalVacationsCount = PersonVacations::where('PersonID', $personID)->whereMonth('VacationDate', $month)->whereYear('VacationDate', $year)->count();
-        $personOfficialVacationsCount = PersonAttendance::where('PersonID', $personID)->select('IsCompanyOnVacation')->whereMonth('AttendanceDate', $month)->whereYear('AttendanceDate', $year)->where('IsCompanyOnVacation', 1)->count();
-        $personWeeklyVacationsCount = PersonAttendance::where('PersonID', $personID)->select('IsWeeklyVacation')->whereMonth('AttendanceDate', $month)->whereYear('AttendanceDate', $year)->where('IsWeeklyVacation', 1)->count();
-        $personAttendedDaysCount = $numberOfDaysPerMonth - ($personalVacationsCount + $personOfficialVacationsCount + $personWeeklyVacationsCount + $personAbsentDaysCount);
-        $personHawafezValue = PersonHafez::select('HafezValue')->where('PersonID', $personID)->whereMonth('HafezDate', $month)->whereYear('HafezDate', $year)->sum('HafezValue');
-        $personKhosoomatValue = PersonKhosoomat::select('KhasmValue')->where('PersonID', $personID)->whereMonth('KhasmDate', $month)->whereYear('KhasmDate', $year)->sum('KhasmValue');
-        $personSolafValue = PersonSolfa::select('SolfaValue')->where('PersonID', $personID)->whereMonth('SolfaDate', $month)->whereYear('SolfaDate', $year)->sum('SolfaValue');
+
+        $personalVacationsFromLimitCount = PersonVacations::where('PersonID', $personID)->whereMonth('VacationDate', $month)->whereYear('VacationDate', $year)->where('IsBeyondLimit', 0)->count();
+        $personalVacationsBeyondLimitCount = PersonVacations::where('PersonID', $personID)->whereMonth('VacationDate', $month)->whereYear('VacationDate', $year)->where('IsBeyondLimit', 1)->count();
+
+        $personAttendedDaysCount = PersonAttendance::where('PersonID', $personID)->whereMonth('AttendanceDate', $month)->whereYear('AttendanceDate', $year)->where('WorkStartTime', '!=', NULL)->where('WorkEndTime', '!=', NULL)->count();
+        
+        $personWeeklyVacationsCount = PersonAttendance::select('AttendanceDate')->where('PersonID', $personID)->whereMonth('AttendanceDate', $month)->whereYear('AttendanceDate', $year)->where('IsWeeklyVacation', 1)->where('WorkStarttime', NULL)->where('WorkEndTime', NULL)->count();
+        $personOfficialVacationsCount = PersonAttendance::select('AttendanceDate')->where('PersonID', $personID)->whereMonth('AttendanceDate', $month)->whereYear('AttendanceDate', $year)->where('IsCompanyOnVacation', 1)->where('WorkStarttime', NULL)->where('WorkEndTime', NULL)->count();
+
         //$personTaameenValue = PersonTaameenValue::select('TaameenValue')->where('PersonID', $personID)->orderBy('UpdateTimestamp', 'desc')->first();
         $taameenConstants = Taameen::find(1);
         $taameenFinalvalue = (float)$salary->Salary * $taameenConstants->TaameenPersonPercentage/100.0;
+
+        $data = [
+            "MainSalary" => $salary->Salary,
+            "VariableSalary" => $salary->VariableSalary,
+            'PersonValueOfDayFromMainSalary' => (float)$salary->Salary/$numberOfDaysPerMonth,
+            'PersonValueOfDayFromVariableSalary' => (float)$salary->Variable/$numberOfDaysPerMonth,
+            'PersonValueOfDay' => (float)($salary->Salary + $salary->VariableSalary)/$numberOfDaysPerMonth,
+            "PersonHafezFromMainSalary" => $personHafezFromMainSalary,
+            "PersonHafezFromVariableSalary" => $personHafezFromVariableSalary,
+            "PersonKhasmFromMainSalary" => $personKhasmFromMainSalary,
+            "PersonKhasmFromVariableSalary" => $personKhasmFromVariableSalary,
+            "PersonSolfaFromMainSalary" => $personSolfaFromMainSalary,
+            "PersonSolfaFromVariableSalary" => $personSolfaFromVariableSalary,
+            "PersonAbsentDaysCount" => $personAbsentDaysCount,
+            "PersonalVacationsFromLimitCount" => $personalVacationsFromLimitCount,
+            "PersonalVacationsBeyondLimitCount" => $personalVacationsBeyondLimitCount,
+            "PersonAttendedDaysCount" => $personAttendedDaysCount,
+            'PersonWeeklyVacationsCount' => $personWeeklyVacationsCount,
+            'PersonOfficialVacationsCount' => $personOfficialVacationsCount,
+            "TaameenFinalvalue" => $taameenFinalvalue,
+            "FinalPayroll" => $salary->Salary + $salary->VariableSalary - $personKhasmFromMainSalary - $personKhasmFromVariableSalary - $personSolfaFromMainSalary - $personSolfaFromVariableSalary + $personHafezFromMainSalary + $personHafezFromVariableSalary - $taameenFinalvalue,
+        ];
+
+        return $data;
     }
 
     public function getPersonPayroll(Request $request)

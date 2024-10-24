@@ -40,7 +40,7 @@ class PersonHafezController extends Controller
             $response['HafezDate'] = $hafez->HafezDate;
             $response['HafezReason'] = $hafez->HafezReason;
             $response['HafezValue'] = $hafez->HafezValue;
-            $response['HafezFromMainSalary'] = $hafez->HafezFromMainSalary;
+            $response['HafezOnMainSalary'] = $hafez->HafezOnMainSalary;
             $response['ValueOfPersonHourFromMainSalary'] = (float)$salary->Salary/(30*8);
             $response['ValueOfPersonDayFromMainSalary'] = (float)$salary->Salary/(30);
             $response['ValueOfPersonHourFromVariableSalary'] = (float)$salary->VariableSalary/(30*8);
@@ -124,7 +124,7 @@ class PersonHafezController extends Controller
                 'HafezDate' => $hafezDate,
                 'HafezValue' => $hafezValue,
                 'HafezReason' => $hafezReason,
-                'HafezFromMainSalary' => $isFromMainSalary,
+                'HafezOnMainSalary' => $isFromMainSalary,
             ]);
             
 
@@ -189,9 +189,9 @@ class PersonHafezController extends Controller
             $changes = true;
         }
 
-        if (isset($isFromMainSalary) && $hafez->HafezFromMainSalary !== $isFromMainSalary)
+        if (isset($isFromMainSalary) && $hafez->HafezOnMainSalary !== $isFromMainSalary)
         {
-            $hafez->HafezFromMainSalary = $isFromMainSalary;
+            $hafez->HafezOnMainSalary = $isFromMainSalary;
             $changes = true;
         }
 

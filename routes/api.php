@@ -149,4 +149,5 @@ Route::put('/close-payroll', [PayrollController::class, 'closePayroll']);
 Route::post('/close-payroll', [PayrollController::class, 'closePayroll']);
 Route::get('/get-payroll', [PayrollController::class, 'getPayroll']);
 Route::put('/delete-payroll', [PayrollController::class, 'deletePayroll']);
+Route::get('/detailed-person-payroll', [PayrollController::class, 'getPersonDetailedPayroll']);
 
