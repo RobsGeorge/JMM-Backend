@@ -434,7 +434,7 @@ class AttendanceController extends Controller
 
         // Update the fields if they are provided and different from the existing values
         if (isset($validatedData['WorkStartTime']) && $attendance->WorkStartTime !== $validatedData['WorkStartTime']) {
-            return 'H';
+            
             $attendance->WorkStartTime = $validatedData['WorkStartTime'];
             $changes['WorkStartTime'] = $validatedData['WorkStartTime'];
         }
